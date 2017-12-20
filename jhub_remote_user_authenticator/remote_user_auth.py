@@ -26,7 +26,6 @@ class MIGMountHandler(BaseHandler):
         if user is None:
             raise web.HTTPError(401)
         else:
-            self.log.warning("Hello from mount handler")
             header_name = self.authenticator.mount_header
             mount_header = self.request.headers.get(header_name, "")
             if mount_header == "":

@@ -1,4 +1,3 @@
-
 import os
 from jupyterhub.handlers import BaseHandler
 from jupyterhub.auth import Authenticator
@@ -6,10 +5,10 @@ from jupyterhub.auth import LocalAuthenticator
 from jupyterhub.utils import url_path_join
 from tornado import gen, web
 from traitlets import Unicode
+from ast import literal_eval
 
 
 class RemoteUserLoginHandler(BaseHandler):
-
     def get(self):
         header_name = self.authenticator.header_name
         remote_user = self.request.headers.get(header_name, "")
@@ -22,19 +21,18 @@ class RemoteUserLoginHandler(BaseHandler):
 
 
 class MIGMountHandler(BaseHandler):
-
     def get(self):
-        self.log.warning("Hello from mount handler")
-        header_name = self.authenticator.mount_header
-        mount_header = self.request.headers.get(header_name, "")
-        if mount_header == "":
+        user = self.get_current_user()
+        if user is None:
             raise web.HTTPError(401)
         else:
-            user = self.get_current_user()
-            self.log.warning("mount current user: " + str(user))
-            user['mount_dict'] = mount_header
-            self.log.warning("mount user_dict: " + str(user.__dict__))
-
+            self.log.warning("Hello from mount handler")
+            header_name = self.authenticator.mount_header
+            mount_header = self.request.headers.get(header_name, "")
+            if mount_header == "":
+                raise web.HTTPError(404)
+            else:
+                user.mig_mount = literal_eval(mount_header)
 
 class RemoteUserAuthenticator(Authenticator):
     """
@@ -88,7 +86,7 @@ class MIGMountRemoteUserAuthenticator(RemoteUserAuthenticator):
         help="""HTTP header to inspect for the authenticated username.""")
 
     mount_header = Unicode(
-        default_VALUE='MIG_MOUNT',
+        default_value='Mig-Mount',
         config=True,
         help="""HTTP header to inspect for the users mount information"""
     )
@@ -102,4 +100,3 @@ class MIGMountRemoteUserAuthenticator(RemoteUserAuthenticator):
     @gen.coroutine
     def authenticate(self, *args):
         raise NotImplemented()
-

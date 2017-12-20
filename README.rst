@@ -1,5 +1,5 @@
 ====================================
-Jupyterhub REMOTE_USER Authenticator
+Jupyterhub REMOTE_USER Authenticator (Forked Extension)
 ====================================
 
 Authenticate to Jupyterhub using an authenticating proxy that can set
@@ -9,18 +9,10 @@ the REMOTE_USER header.
 Installation
 ------------
 
-This package can be installed with `pip` either from a local git repository or from PyPi.
-
 Installation from local git repository::
 
     cd jhub_remote_user_authenticator
     pip install .
-
-Installation from PyPi::
-
-    pip install jhub_remote_user_authenticator
-
-Alternately, you can add the local project folder must be on your PYTHONPATH.
 
 -------------
 Configuration
@@ -43,3 +35,10 @@ This provides the same authentication functionality but is derived from
 `LocalAuthenticator` and therefore provides features such as the ability
 to add local accounts through the admin interface if configured to do so.
 
+# Extension
+
+Provide the possibility to provide MIG mount information for the authenticated user.
+
+i.e
+
+    c.JupyterHub.authenticator_class = 'jhub_remote_user_authenticator.remote_user_auth.MIGMountRemoteUserAuthenticator'

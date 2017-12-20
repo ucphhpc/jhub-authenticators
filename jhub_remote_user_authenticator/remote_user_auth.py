@@ -21,6 +21,21 @@ class RemoteUserLoginHandler(BaseHandler):
             self.redirect(url_path_join(self.hub.server.base_url, 'home'))
 
 
+class MIGMountHandler(BaseHandler):
+
+    def get(self):
+        self.log.warning("Hello from mount handler")
+        header_name = self.authenticator.mount_header
+        mount_header = self.request.headers.get(header_name, "")
+        if mount_header == "":
+            raise web.HTTPError(401)
+        else:
+            user = self.get_current_user()
+            self.log.warning("mount current user: " + str(user))
+            user['mount_dict'] = mount_header
+            self.log.warning("mount user_dict: " + str(user.__dict__))
+
+
 class RemoteUserAuthenticator(Authenticator):
     """
     Accept the authenticated user name from the REMOTE_USER HTTP header.
@@ -59,3 +74,32 @@ class RemoteUserLocalAuthenticator(LocalAuthenticator):
     @gen.coroutine
     def authenticate(self, *args):
         raise NotImplementedError()
+
+
+class MIGMountRemoteUserAuthenticator(RemoteUserAuthenticator):
+    """
+    Accept the authenticated user name from the REMOTE_USER HTTP header.
+    In addition to this it also allows MIG to pass user mount data that allows the jhub to mount the MIG home drive
+    for that particular user
+    """
+    header_name = Unicode(
+        default_value='REMOTE_USER',
+        config=True,
+        help="""HTTP header to inspect for the authenticated username.""")
+
+    mount_header = Unicode(
+        default_VALUE='MIG_MOUNT',
+        config=True,
+        help="""HTTP header to inspect for the users mount information"""
+    )
+
+    def get_handlers(self, app):
+        return [
+            (r'/login', RemoteUserLoginHandler),
+            (r'/mount', MIGMountHandler)
+        ]
+
+    @gen.coroutine
+    def authenticate(self, *args):
+        raise NotImplemented()
+

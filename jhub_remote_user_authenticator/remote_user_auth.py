@@ -1,4 +1,3 @@
-import os
 from jupyterhub.handlers import BaseHandler
 from jupyterhub.auth import Authenticator
 from jupyterhub.auth import LocalAuthenticator
@@ -13,7 +12,7 @@ class RemoteUserLoginHandler(BaseHandler):
         header_name = self.authenticator.header_name
         remote_user = self.request.headers.get(header_name, "")
         if remote_user == "":
-            raise web.HTTPError(401)
+            raise web.HTTPError(401, "You are not authenticated to do this")
         else:
             user = self.user_from_username(remote_user)
             self.set_login_cookie(user)
@@ -29,9 +28,10 @@ class MIGMountHandler(BaseHandler):
             header_name = self.authenticator.mount_header
             mount_header = self.request.headers.get(header_name, "")
             if mount_header == "":
-                raise web.HTTPError(404)
+                raise web.HTTPError(404, "A valid mount header was not present")
             else:
                 user.mig_mount = literal_eval(mount_header)
+
 
 class RemoteUserAuthenticator(Authenticator):
     """
@@ -80,7 +80,7 @@ class MIGMountRemoteUserAuthenticator(RemoteUserAuthenticator):
     for that particular user
     """
     header_name = Unicode(
-        default_value='REMOTE_USER',
+        default_value='Remote-User',
         config=True,
         help="""HTTP header to inspect for the authenticated username.""")
 

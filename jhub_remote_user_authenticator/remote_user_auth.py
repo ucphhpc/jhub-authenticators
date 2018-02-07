@@ -39,6 +39,7 @@ def safeinput_decode(input_str):
 
 
 class RemoteUserLoginHandler(BaseHandler):
+
     def get(self):
         header_name = self.authenticator.header_name
         remote_user = self.request.headers.get(header_name, "")
@@ -48,28 +49,50 @@ class RemoteUserLoginHandler(BaseHandler):
             safe_user = safeinput_encode(remote_user)
             user = self.user_from_username(safe_user)
             self.set_login_cookie(user)
-            self.redirect(url_path_join(self.hub.server.base_url, 'home'))
+            argument = self.get_argument("next", None, True)
+            if argument is not None:
+                self.redirect(argument)
+            else:
+                self.redirect(url_path_join(self.hub.server.base_url, 'home'))
 
 
-class MIGMountHandler(BaseHandler):
+class MiGMountHandler(BaseHandler):
     """
     If the request is properly authenticated, check for Mig-Mount HTTP header,
     Excepts a string structure that can be interpreted by python
     The data is set to the user's mig_mount attribute
     """
-
+    @web.authenticated
     def get(self):
-        user = self.get_current_user()
-        if user is None:
-            raise web.HTTPError(401)
+        header_name = self.authenticator.mount_header
+        mount_header = self.request.headers.get(header_name, "")
+        if mount_header == "":
+            raise web.HTTPError(403, "The request must contain a Mig-Mount "
+                                     "header")
         else:
-            header_name = self.authenticator.mount_header
-            mount_header = self.request.headers.get(header_name, "")
-            if mount_header == "":
-                raise web.HTTPError(404,
-                                    "A valid mount header was not present")
-            else:
-                user.mig_mount = literal_eval(mount_header)
+            mount_header_dict = None
+            try:
+                mount_header_dict = literal_eval(mount_header)
+            except ValueError as err:
+                self.log.warning("Error: " + str(err))
+                raise web.HTTPError(403, "The Mig-Mount header couldnt be "
+                                         "properly evaluated, invalid "
+                                         "format")
+
+            if type(mount_header_dict) is not dict:
+                raise web.HTTPError(403, "The Mig-Mount header must be in a "
+                                         "dictionary format")
+            # Validate required dictionary keys
+            required_keys = ['SESSIONID', 'TARGET_MOUNT_ADDR',
+                             'MOUNTSSHPRIVATEKEY']
+            missing_keys = [key for key in required_keys if key
+                            not in mount_header_dict]
+            if len(missing_keys) > 0:
+                raise web.HTTPError(403, "Missing Mig-Mount header keys: "
+                                    + ",".join(missing_keys))
+            self.log.info("Accepted mount header: " + str(mount_header_dict))
+            self.get_current_user().mig_mount = mount_header_dict
+            self.redirect(url_path_join(self.hub.server.base_url, 'home'))
 
 
 class RemoteUserAuthenticator(Authenticator):
@@ -129,10 +152,11 @@ class MIGMountRemoteUserAuthenticator(RemoteUserAuthenticator):
         help="""HTTP header to inspect for the users mount information"""
     )
 
+    # These paths are an extension of the prefix base url e.g. /dag/hub
     def get_handlers(self, app):
         return [
             (r'/login', RemoteUserLoginHandler),
-            (r'/mount', MIGMountHandler)
+            (r'/mount', MiGMountHandler)
         ]
 
     @gen.coroutine

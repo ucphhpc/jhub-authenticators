@@ -38,6 +38,14 @@ def safeinput_decode(input_str):
     return str(b32decode(bytes(decode_str, 'utf-8')), 'utf-8')
 
 
+class PartialBaseURLHandler(BaseHandler):
+    """
+    Fix against /base_url requests are not redirected to /base_url/home
+    """
+    def get(self):
+        self.redirect(url_path_join(self.hub.server.base_url, 'home'))
+
+
 class RemoteUserLoginHandler(BaseHandler):
 
     def get(self):
@@ -138,8 +146,8 @@ class RemoteUserLocalAuthenticator(LocalAuthenticator):
 class MIGMountRemoteUserAuthenticator(RemoteUserAuthenticator):
     """
     Accept the authenticated user name from the Remote-User HTTP header.
-    In addition to this it also allows MIG to pass user mount data that allows
-    the jhub to mount the MIG home drive for that particular user
+    In addition to this it also allows MiG to pass user mount data that allows
+    the jhub to mount the MiG home drive for that particular user
     """
     header_name = Unicode(
         default_value='Remote-User',
@@ -154,7 +162,10 @@ class MIGMountRemoteUserAuthenticator(RemoteUserAuthenticator):
 
     # These paths are an extension of the prefix base url e.g. /dag/hub
     def get_handlers(self, app):
+        # redirect baseurl e.g. /hub/ and /hub to /hub/home
         return [
+            (app.base_url[:-1], PartialBaseURLHandler),
+            (app.base_url, PartialBaseURLHandler),
             (r'/login', RemoteUserLoginHandler),
             (r'/mount', MiGMountHandler)
         ]

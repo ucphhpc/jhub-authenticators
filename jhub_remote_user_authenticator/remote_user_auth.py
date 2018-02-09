@@ -42,12 +42,12 @@ class PartialBaseURLHandler(BaseHandler):
     """
     Fix against /base_url requests are not redirected to /base_url/home
     """
-
     def get(self):
         self.redirect(url_path_join(self.hub.server.base_url, 'home'))
 
 
 class RemoteUserLoginHandler(BaseHandler):
+
     def get(self):
         header_name = self.authenticator.header_name
         remote_user = self.request.headers.get(header_name, "")
@@ -57,7 +57,6 @@ class RemoteUserLoginHandler(BaseHandler):
             safe_user = safeinput_encode(remote_user)
             user = self.user_from_username(safe_user)
             self.set_login_cookie(user)
-            self.get_current_user().real_name = remote_user
             argument = self.get_argument("next", None, True)
             if argument is not None:
                 self.redirect(argument)
@@ -71,21 +70,21 @@ class MiGMountHandler(BaseHandler):
     Excepts a string structure that can be interpreted by python
     The data is set to the user's mig_mount attribute
     """
-
     @web.authenticated
     def get(self):
         header_name = self.authenticator.mount_header
         mount_header = self.request.headers.get(header_name, "")
         if mount_header == "":
-            raise web.HTTPError(403, "The request must"
-                                     "contain a Mig-Mount header")
+            raise web.HTTPError(403, "The request must contain a Mig-Mount "
+                                     "header")
         else:
             mount_header_dict = None
             try:
                 mount_header_dict = literal_eval(mount_header)
             except ValueError as err:
+                self.log.warning("Error: " + str(err))
                 raise web.HTTPError(403, "The Mig-Mount header couldnt be "
-                                         "properly evaluated, unrecognisable "
+                                         "properly evaluated, invalid "
                                          "format")
 
             if type(mount_header_dict) is not dict:
@@ -99,9 +98,7 @@ class MiGMountHandler(BaseHandler):
             if len(missing_keys) > 0:
                 raise web.HTTPError(403, "Missing Mig-Mount header keys: "
                                     + ",".join(missing_keys))
-            self.log.info("Accepted mount header: " + str(mount_header_dict)
-                          + " for user: "
-                          + safeinput_decode(self.get_current_user()))
+            self.log.info("Accepted mount header: " + str(mount_header_dict))
             self.get_current_user().mig_mount = mount_header_dict
             self.redirect(url_path_join(self.hub.server.base_url, 'home'))
 

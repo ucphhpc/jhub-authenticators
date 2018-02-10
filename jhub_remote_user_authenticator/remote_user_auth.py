@@ -56,6 +56,7 @@ class RemoteUserLoginHandler(BaseHandler):
         else:
             safe_user = safeinput_encode(remote_user)
             user = self.user_from_username(safe_user)
+            user.real_name = remote_user
             self.set_login_cookie(user)
             argument = self.get_argument("next", None, True)
             if argument is not None:
@@ -74,6 +75,7 @@ class MiGMountHandler(BaseHandler):
     def get(self):
         header_name = self.authenticator.mount_header
         mount_header = self.request.headers.get(header_name, "")
+        user = self.get_current_user().real_name
         if mount_header == "":
             raise web.HTTPError(403, "The request must contain a Mig-Mount "
                                      "header")
@@ -82,23 +84,28 @@ class MiGMountHandler(BaseHandler):
             try:
                 mount_header_dict = literal_eval(mount_header)
             except ValueError as err:
-                self.log.warning("Error: " + str(err))
-                raise web.HTTPError(403, "The Mig-Mount header couldnt be "
-                                         "properly evaluated, invalid "
-                                         "format")
+                msg = "passed invalid Mig-Mount header format"
+                self.log.error("User: {} - {} - {}".format(user, msg, err))
+                raise web.HTTPError(403, "{}".format(msg))
 
             if type(mount_header_dict) is not dict:
-                raise web.HTTPError(403, "The Mig-Mount header must be in a "
-                                         "dictionary format")
+                msg = "MiG-Mount header must be a dictionary"
+                self.log.error("User: {} - {}".format(user, msg))
+                raise web.HTTPError(403, "{}".format(msg))
+
             # Validate required dictionary keys
-            required_keys = ['SESSIONID', 'TARGET_MOUNT_ADDR',
-                             'MOUNTSSHPRIVATEKEY']
+            required_keys = ['SESSIONID', 'USER_CERT', 'TARGET_MOUNT_ADDR',
+                             'MOUNTSSHPRIVATEKEY', 'MOUNTSSHPUBLICKEY']
             missing_keys = [key for key in required_keys if key
                             not in mount_header_dict]
             if len(missing_keys) > 0:
-                raise web.HTTPError(403, "Missing Mig-Mount header keys: "
-                                    + ",".join(missing_keys))
-            self.log.info("Accepted mount header: " + str(mount_header_dict))
+                msg = "Missing Mig-Mount header keys: {}"\
+                    .format(",".join(missing_keys))
+                self.log.error("User: {} - {}".format(user, msg))
+                raise web.HTTPError(403, "{}".format(msg))
+
+            self.log.info("User: {} - Accepted MiG mount header"
+                          .format(user))
             self.get_current_user().mig_mount = mount_header_dict
             self.redirect(url_path_join(self.hub.server.base_url, 'home'))
 

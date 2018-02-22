@@ -94,8 +94,9 @@ class MiGMountHandler(BaseHandler):
                 raise web.HTTPError(403, "{}".format(msg))
 
             # Validate required dictionary keys
-            required_keys = ['SESSIONID', 'USER_CERT', 'TARGET_MOUNT_ADDR',
-                             'MOUNTSSHPRIVATEKEY', 'MOUNTSSHPUBLICKEY']
+            required_keys = ['SESSIONID', 'USER_CERT', 'CREATED_TIMESTAMP',
+                             'TARGET_MOUNT_ADDR', 'MOUNTSSHPRIVATEKEY',
+                             'MOUNTSSHPUBLICKEY']
             missing_keys = [key for key in required_keys if key
                             not in mount_header_dict]
             if len(missing_keys) > 0:
@@ -104,8 +105,8 @@ class MiGMountHandler(BaseHandler):
                 self.log.error("User: {} - {}".format(user, msg))
                 raise web.HTTPError(403, "{}".format(msg))
 
-            self.log.info("User: {} - Accepted MiG mount header"
-                          .format(user))
+            self.log.debug("User: {} - Accepted MiG mount header: {}"
+                          .format(user, mount_header_dict))
             self.get_current_user().mig_mount = mount_header_dict
             self.redirect(url_path_join(self.hub.server.base_url, 'home'))
 

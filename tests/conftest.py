@@ -62,6 +62,3 @@ def hub_container(hub_image):
             container.remove(v=True, force=True)
         except docker.errors.NotFound:
             exist = False
-
-
-

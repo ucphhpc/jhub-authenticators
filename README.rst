@@ -14,6 +14,10 @@ This includes a MiG
 Installation
 ------------
 
+Installation from pypi::
+
+    pip install jhub_remote_user_auth_mig_mount
+
 Installation from local git repository::
 
     cd jhub_remote_user_auth_mig_mount

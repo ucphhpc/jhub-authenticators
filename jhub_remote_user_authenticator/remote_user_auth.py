@@ -94,7 +94,7 @@ class MiGMountHandler(BaseHandler):
                 raise web.HTTPError(403, "{}".format(msg))
 
             # Validate required dictionary keys
-            required_keys = ['SESSIONID', 'USER_CERT', 'CREATED_TIMESTAMP',
+            required_keys = ['SESSIONID', 'USER_CERT',
                              'TARGET_MOUNT_ADDR', 'MOUNTSSHPRIVATEKEY',
                              'MOUNTSSHPUBLICKEY']
             missing_keys = [key for key in required_keys if key

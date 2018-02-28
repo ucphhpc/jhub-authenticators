@@ -1,23 +1,21 @@
 sudo: required
-services:
-    docker
+services: docker
 language: python
-python:
-    "3.6"
+python: '3.6'
 install:
-  - pip install -r tests/requirements.txt
-  - docker pull jupyterhub/jupyterhub:0.7.2
+- pip install -r tests/requirements.txt
+- docker pull jupyterhub/jupyterhub:0.7.2
 script:
-  - python setup.py check -rms
-  - flake8
-  - pytest
+- python setup.py check -rms
+- flake8
+- pytest
 deploy:
   skip_cleanup: true
-  distributions: 'sdist bdist_wheel'
+  distributions: sdist bdist_wheel
   provider: pypi
   user: rasmunk
   password:
-    secure: "ZQNLbdYd4US6WywLoPFMbpVJOeSQTYfF8/8Y8vXhAAZp4WiZGeHIiSXeEkmEGFvo5lCm4EKUHOEe0LhhbgbSrZ/kID8Bm3w9qxJ9err7cUPdJGvXi9P0gFPuK58B5uA3AH4u6ZXipS4lUwWeojtrLsufH5RBHa4AqqcLZE8BESSXkvO5xI/jUWDDHD31Ht94mNM/7NtWvWBhDmoZuH8xqrMzwDdBBuVczPaaITGwNXP1qS0Cpl5kBfCQqMzUlvGqRx4cCbFHR7Hahq0vIY2wN+nqIeSJLAeSrhuVATPK938XP7iErZhDUfhwFwn6IiGbYPoLeOVQ8oQ7R8fecazbK92rxNUPoSacY6Wve8Le+vOaHWnTgORcSowYsGa5Jbo5yDPgYKu6fVmAB4leGjNByRKj/vaSM7qDMLSzokkql2kdQd+kFJbi3LoZXGNU1fCr0PkXzefB8vjU8Q6QXZWxTKOWQcnWcnaxT5v0oVAsq8chWH7BKeE0X49eKR5XZLFG4eYVL/Hdjvb90TX5Fn+R4FqlzcDfb42fbDkdoUCb1svUY1MHGnEo2h+UcYJ6BZu1UBm0e/XkkkBVC5CCiXkC5KNCbU9dsfaUoO24ftdlSM6WZApY8tfODl4y3DY75/hqa7Lp6ty5cumpZD3BKbFF7qEiUr3kspK+cPXBiWZGA4E="
+    secure: AnHZHER3FZHJwJk0/r+pJOLPrZquz38ZfVAoPwiXOkNtEOK0ifnU6c+Uajq3euW+FFFLfA3+chOeHfUyNvR9ExVjMWxUVGPlNPRBo7Df691IOiU7eQQdO06UbJVlmkCBnLorOS0xgeGkwHPGjos01QJN7lJfSD3o6nGixLtXJ1cVRq8NQ+xbqhFADzkLIYFqWH0298Xs0pYU6BwYArOhbqu7EuqnSHyxF2phPEis6ybzrQvhkAvUQiw5n3gVsqVc6XFI3pK7AFIYNtdBuaODCwcRVf3DxdCAvSlhUGW7lQsD6qjLxJ7A4A48MkyJ/HPJPxwwtqcv2WvCLP0Gux6DemSOPJkNrYigX+ZOSj/F4Z7qgD4CcIU/UjKgSTxGREcAbLdr7x1mWCPGXWRTtodXXANQ0ORLZTlaY5Y7/A0vMa0N+vHQMxzmHdIR9uyIHoSlA1CcLfTmal6jFzmL87s0yvwZlVPU2I7ifHJ2TvgP42atnUcdv1CvkMtvcCykNMY0XaS+Da2u61YRHzPoyUuUmMyrUuQ4XXHCcsfOXu7L31pjC319wink+DHsp/AE8EqNhhSyXMlrS5vZ9QBXBS+7fdpC8kUzgeevcFimR/+LhDPYTxepnK1q0AX+kz8oGFpTKhcicyMHTMzIKCRYt5hMoevKqPEnXb33+HoPdjrTsgI=
   on:
     tags: true
     branch: master

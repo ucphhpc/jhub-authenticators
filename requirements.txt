@@ -1,1 +1,4 @@
-jupyterhub==0.7.2
+jupyterhub>=0.7.2
+tornado
+traitlets
+docutils

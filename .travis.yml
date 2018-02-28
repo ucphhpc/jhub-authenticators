@@ -1,0 +1,13 @@
+sudo: required
+services:
+    docker
+language: python
+python:
+    "3.6"
+install:
+  - pip install -r tests/requirements.txt
+  - docker pull jupyterhub/jupyterhub:0.8.0rc2
+
+script:
+  - python setup.py check -rms
+  - pytest

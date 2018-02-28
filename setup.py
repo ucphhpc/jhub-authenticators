@@ -4,9 +4,9 @@
 # Copyright (c) Juptyer Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Minimal Python version sanity check (from IPython/Jupyterhub)
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 from __future__ import print_function
 
@@ -23,19 +23,20 @@ version_ns = {}
 with open(pjoin(here, 'version.py')) as f:
     exec(f.read(), {}, version_ns)
 
+long_description = open('README.rst').read()
+
 setup_args = dict(
-    name                = 'jhub_remote_user_authenticator',
-    packages            = ['jhub_remote_user_authenticator'],
-    version             = version_ns['__version__'],
-    description         = """REMOTE_USER Authenticator: An Authenticator for Jupyterhub to read user information from HTTP request headers, as when running behind an authenticating proxy.""",
-    long_description    = "",
-    author              = "Carl (https://github.com/cwaldbieser)",
-    author_email        = "",
-    url                 = "https://github.com/rasmunk/jhub_remote_user_authenticator",
-    license             = "GPLv3",
-    platforms           = "Linux, Mac OS X",
-    keywords            = ['Interactive', 'Interpreter', 'Shell', 'Web'],
-    classifiers         = [
+    name='jhub_remote_user_auth_mig_mount',
+    packages=['jhub_remote_user_auth_mig_mount'],
+    version=version_ns['__version__'],
+    long_description=long_description,
+    author="Rasmus Munk",
+    author_email="munk1@live.dk",
+    url="https://github.com/rasmunk/jhub_remote_user_auth_mig_mount",
+    license="GPLv3",
+    platforms="Linux, Mac OS X",
+    keywords=['Interactive', 'Interpreter', 'Shell', 'Web'],
+    classifiers=[
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
         'Intended Audience :: Science/Research',
@@ -50,8 +51,10 @@ if 'setuptools' in sys.modules:
     setup_args['install_requires'] = install_requires = []
     install_requires.append('jupyterhub')
 
+
 def main():
     setup(**setup_args)
+
 
 if __name__ == '__main__':
     main()

@@ -24,6 +24,7 @@ def hub_image():
     else:
         client.images.remove(image.tags[0])
 
+
 # Setup a container before handing over to the test that requires a
 # hub_container
 @pytest.fixture

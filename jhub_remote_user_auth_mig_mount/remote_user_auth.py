@@ -42,12 +42,12 @@ class PartialBaseURLHandler(BaseHandler):
     """
     Fix against /base_url requests are not redirected to /base_url/home
     """
+
     def get(self):
         self.redirect(url_path_join(self.hub.server.base_url, 'home'))
 
 
 class RemoteUserLoginHandler(BaseHandler):
-
     def get(self):
         header_name = self.authenticator.header_name
         remote_user = self.request.headers.get(header_name, "")
@@ -71,6 +71,7 @@ class MiGMountHandler(BaseHandler):
     Excepts a string structure that can be interpreted by python
     The data is set to the user's mig_mount attribute
     """
+
     @web.authenticated
     def get(self):
         header_name = self.authenticator.mount_header
@@ -100,13 +101,13 @@ class MiGMountHandler(BaseHandler):
             missing_keys = [key for key in required_keys if key
                             not in mount_header_dict]
             if len(missing_keys) > 0:
-                msg = "Missing Mig-Mount header keys: {}"\
+                msg = "Missing Mig-Mount header keys: {}" \
                     .format(",".join(missing_keys))
                 self.log.error("User: {} - {}".format(user, msg))
                 raise web.HTTPError(403, "{}".format(msg))
 
             self.log.debug("User: {} - Accepted MiG mount header: {}"
-                          .format(user, mount_header_dict))
+                           .format(user, mount_header_dict))
             self.get_current_user().mig_mount = mount_header_dict
             self.redirect(url_path_join(self.hub.server.base_url, 'home'))
 

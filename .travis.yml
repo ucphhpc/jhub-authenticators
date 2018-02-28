@@ -9,6 +9,7 @@ install:
   - docker pull jupyterhub/jupyterhub:0.7.2
 script:
   - python setup.py check -rms
+  - flake8
   - pytest
 deploy:
   skip_cleanup: true

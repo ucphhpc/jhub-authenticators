@@ -1,4 +1,5 @@
-jupyterhub>=0.7.2
-tornado
-traitlets
-docutils
+jupyterhub==0.7.2
+tornado==4.5.3
+traitlets==4.3.2
+docutils==0.13.1
+ast==0.0.2

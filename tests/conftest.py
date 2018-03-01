@@ -54,6 +54,14 @@ def hub_container(hub_image):
         time.sleep(1)
         container = client.containers.get(HUB_CONTAINER_NAME)
 
+    # TODO -> investigate whether jhub has a check call for when it is ready
+    # And wait some more. This is...not great, but there seems to be
+    # a period after the task is running but before the hub will accept
+    # connections.
+    # If the test code attempts to connect to the hub during that time,
+    # it fails.
+    time.sleep(10)
+
     yield container
     # ensure that the container is gone before returning
     exist = True

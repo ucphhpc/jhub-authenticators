@@ -1,5 +1,5 @@
-.. image:: https://travis-ci.org/rasmunk/jhub_remote_user_authenticator.svg?branch=master
-    :target: https://travis-ci.org/rasmunk/jhub_remote_user_authenticator
+.. image:: https://travis-ci.org/rasmunk/jhub_remote_user_auth_mig_mount.svg?branch=master
+    :target: https://travis-ci.org/rasmunk/jhub_remote_user_auth_mig_mount
 
 ====================================
 Jupyterhub REMOTE_USER Authenticator

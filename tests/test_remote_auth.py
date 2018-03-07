@@ -56,10 +56,11 @@ def test_auth_mount(hub_container):
     }
 
     # Random key set
-    correct_mig_dict = {'SESSIONID': 'randomstring_unique_string',
+    correct_mig_dict = {'MOUNT_HOST': 'IDMC',
+                        'SESSION_ID': 'randomstring_unique_string',
                         'USER_CERT': user_cert,
                         'TARGET_MOUNT_ADDR': '@host.localhost:',
-                        'MOUNTSSHPRIVATEKEY': '''-----BEGIN RSA PRIVATE KEY-----
+                        'MOUNT_SSH_PRIVATE_KEY': '''-----BEGIN RSA PRIVATE KEY-----
     MIIEpAIBAAKCAQEA00VP99Nbg6AFrfeByzHtC4G2eLZGDCXP0pBG5tNNmaXKq5sU
     IrDPA7fJczwIfMNlqWeoYjEYg46vbMRxwIDXDDA990JK49+CrpwppxWgSE01WPis
     gtqfmaV16z8CS4WmkjSZnUKQf+2Yk9zdBXOOjWLiXBog7dGpUZQUV/j3u262DIl5
@@ -85,20 +86,8 @@ def test_auth_mount(hub_container):
     IUbrx2ECgYAck/GKM9grs2QSDmiQr3JNz1aUS0koIrE/jz4rYk/hIG4x7YFoPG4L
     D8rT/LeoFbxDarVRGkgu1pz13IQN2ItBp1qQVr4FqbN4emgj73wOWiFgrlRvasYV
     ojR4eIsIc//+fVpkr56fg2OUGhmI+jw87k9hG5uxgBCqOAJuWjEo7A==
-    -----END RSA PRIVATE KEY-----''',
-                        'MOUNTSSHPUBLICKEY': 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQ'
-                                             'ABAAABAQDTRU/301uDoAWt94HLMe0L'
-                                             'gbZ4tkYMJc/SkEbm002ZpcqrmxQisM'
-                                             '8Dt8lzPAh8w2WpZ6hiMRiDjq9sxHHA'
-                                             'gNcMMD33Qkrj34KunCmnFaBITTVY+K'
-                                             'yC2p+ZpXXrPwJLhaaSNJmdQpB/7ZiT'
-                                             '3N0Fc46NYuJcGiDt0alRlBRX+Pe7br'
-                                             'YMiXmgsa2jL+aWM/HevAZNKpWhq9Rb'
-                                             'bOHuTS0UiEa39PXgTdO4BN1QgMCw+Z'
-                                             '8tVcUXHvpbQnFi/e6gIYBQ53akWGpR'
-                                             'cM8tixIbmt5ahDyJcclLzgTzAcAiZw'
-                                             'uFhxxEuDYBPdtNeYLX8FfeV+vBeNoE'
-                                             't8xmJST9x1ItSHqHG1I9'}
+    -----END RSA PRIVATE KEY-----'''}
+
     correct_mig_header = {
         'Mig-Mount': str(correct_mig_dict)
     }

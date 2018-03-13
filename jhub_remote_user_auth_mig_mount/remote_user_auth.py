@@ -95,8 +95,8 @@ class MiGMountHandler(BaseHandler):
                 raise web.HTTPError(403, "{}".format(msg))
 
             # Validate required dictionary keys
-            required_keys = ['MOUNT_HOST', 'SESSION_ID', 'USER_CERT',
-                             'TARGET_MOUNT_ADDR', 'MOUNT_SSH_PRIVATE_KEY']
+            required_keys = ['MOUNT_HOST', 'SESSIONID', 'TARGET_MOUNT_ADDR',
+                             'MOUNTSSHPRIVATEKEY']
             missing_keys = [key for key in required_keys if key
                             not in mount_header_dict]
             if len(missing_keys) > 0:

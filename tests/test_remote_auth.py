@@ -57,10 +57,9 @@ def test_auth_mount(hub_container):
 
     # Random key set
     correct_mig_dict = {'MOUNT_HOST': 'IDMC',
-                        'SESSION_ID': 'randomstring_unique_string',
-                        'USER_CERT': user_cert,
+                        'SESSIONID': 'randomstring_unique_string',
                         'TARGET_MOUNT_ADDR': '@host.localhost:',
-                        'MOUNT_SSH_PRIVATE_KEY': '''-----BEGIN RSA PRIVATE KEY-----
+                        'MOUNTSSHPRIVATEKEY': '''-----BEGIN RSA PRIVATE KEY-----
     MIIEpAIBAAKCAQEA00VP99Nbg6AFrfeByzHtC4G2eLZGDCXP0pBG5tNNmaXKq5sU
     IrDPA7fJczwIfMNlqWeoYjEYg46vbMRxwIDXDDA990JK49+CrpwppxWgSE01WPis
     gtqfmaV16z8CS4WmkjSZnUKQf+2Yk9zdBXOOjWLiXBog7dGpUZQUV/j3u262DIl5

@@ -65,15 +65,13 @@ The expected format of the Mig-Mount header is that the passed string can be eva
 After being successfully evaluated to a dictionary, the header is required to contain the following information::
 
     {
+        MOUNT_HOST: 'hostname of the target mount host',
         SESSIONID: 'A random string that identifies an active mount session',
-        USER_CERT: 'user's certificate subject string, e.g. /C=US/ST=Oregon/L=Portland/O=Company Name/OU=Org/CN=www.example.com',
         TARGET_MOUNT_ADDR: 'The target URL of the system/service that grants jupyter users to mount their notebook against, e.g @idmc.dk:',
         MOUNTSSHPRIVATEKEY: 'private key',
-        MOUNTSSHPUBLICKEY: 'public key'
     }
 
 Note:
 =====
 Since we are passing private key's over the network, it is important that this information is sent over an encrypted channel, furthermore the host/service that grant this mount information should limit the validity of a keyset, e.g. can be used for 2 hours before a new set has to be generated and the old is void.
-
 Upon successful parsing of the header, the active jupyterhub user instance is appended with a 'mig_mount' property that contains the accepted dictionary header.

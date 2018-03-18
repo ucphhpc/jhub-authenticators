@@ -1,4 +1,4 @@
-FROM jupyterhub/jupyterhub:0.8.0rc2
+FROM jupyterhub/jupyterhub:0.8.1
 
 ADD jhub_remote_user_auth_mig_mount /app/jhub_remote_user_auth_mig_mount
 ADD setup.py /app/setup.py

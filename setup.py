@@ -37,7 +37,7 @@ setup(
     keywords=['Interactive', 'Interpreter', 'Shell', 'Web'],
     install_requires=[
         'jupyterhub>=0.8.1',
-        'tornado>=4.5.3',
+        'tornado>=5.0.2',
         'traitlets>=4.3.2',
         'docutils>=0.13.1'
     ],

@@ -20,3 +20,5 @@ deploy:
     tags: true
     branch: master
     python: '3.6'
+notifications: 
+  slack: raz-s:se1PurXsQJv03nBZa9XWMOOS

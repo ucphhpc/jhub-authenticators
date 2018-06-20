@@ -1,6 +1,7 @@
 import requests
 import docker
 import pytest
+import time
 from os.path import join, dirname, realpath
 from docker.types import Mount
 
@@ -34,8 +35,9 @@ def tests_auth_hub(image, container):
     """
     Test that the client is able to,
     - Authenticate with the Remote-User header
-    - Once auth'ed, Pass a Mig-Mount header to the jupyterhub
+    - Once auth'ed, Pass a Mount header to the jupyterhub
     """
+    time.sleep(10)
     client = docker.from_env()
     containers = client.containers.list()
     assert len(containers) > 0
@@ -67,6 +69,7 @@ def tests_auth_hub(image, container):
 @pytest.mark.parametrize('image', [jhub_image], indirect=['image'])
 @pytest.mark.parametrize('container', [jhub_cont], indirect=['container'])
 def test_auth_mount(image, container):
+    time.sleep(10)
     client = docker.from_env()
     containers = client.containers.list()
     assert len(containers) > 0

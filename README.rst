@@ -55,9 +55,9 @@ Provides the capability to supply the jupyterhub user with a set of ssh keys tha
 This adds two base request paths to the jupyterhub web application::
 
 '/login' -> requires a non empty Remote-User header
-'/mount' -> requires both a non empty Remote-User and Mig-Mount header
+'/mount' -> requires both a non empty Remote-User and Mount header
 
-The expected format of the Mig-Mount header is that the passed string can be evaluated to a python dictionary via::
+The expected format of the Mount header is that the passed string can be evaluated to a python dictionary via::
 
             try:
                 mount_header_dict = literal_eval(mount_header)
@@ -65,9 +65,10 @@ The expected format of the Mig-Mount header is that the passed string can be eva
 After being successfully evaluated to a dictionary, the header is required to contain the following information::
 
     {
-        MOUNT_HOST: 'hostname of the target mount host',
-        SESSIONID: 'A random string that identifies an active mount session',
-        TARGET_MOUNT_ADDR: 'The target URL of the system/service that grants jupyter users to mount their notebook against, e.g @idmc.dk:',
+        HOST: 'hostname of the target mount host',
+        USERNAME: 'A random string that identifies an active mount session',
+        PATH: 'The target URL of the system/service that grants jupyter users to mount
+        their notebook against, e.g @idmc.dk:',
         MOUNTSSHPRIVATEKEY: 'private key',
     }
 

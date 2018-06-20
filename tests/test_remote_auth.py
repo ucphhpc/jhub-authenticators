@@ -104,16 +104,16 @@ def test_auth_mount(image, container):
     assert auth_response.status_code == 200
 
     wrong_dict = {'USER': 's324324234',
-                      'WIE': 'dsfsdfs'}
+                  'WIE': 'dsfsdfs'}
     wrong_header = {
         'Mount': str(wrong_dict)
     }
 
     # Random key set
     correct_dict = {'HOST': 'hostaddr',
-                        'USERNAME': 'randomstring_unique_string',
-                        'PATH': '@host.localhost:',
-                        'MOUNTSSHPRIVATEKEY': '''-----BEGIN RSA PRIVATE KEY-----
+                    'USERNAME': 'randomstring_unique_string',
+                    'PATH': '@host.localhost:',
+                    'MOUNTSSHPRIVATEKEY': '''-----BEGIN RSA PRIVATE KEY-----
     MIIEpAIBAAKCAQEA00VP99Nbg6AFrfeByzHtC4G2eLZGDCXP0pBG5tNNmaXKq5sU
     IrDPA7fJczwIfMNlqWeoYjEYg46vbMRxwIDXDDA990JK49+CrpwppxWgSE01WPis
     gtqfmaV16z8CS4WmkjSZnUKQf+2Yk9zdBXOOjWLiXBog7dGpUZQUV/j3u262DIl5

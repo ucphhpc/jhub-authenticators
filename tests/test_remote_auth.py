@@ -34,10 +34,11 @@ jhub_cont = {'image': IMAGE, 'name': IMAGE_NAME,
 def tests_auth_hub(image, container):
     """
     Test that the client is able to,
+    - Not access the home path without being authed
     - Authenticate with the Remote-User header
-    - Once auth'ed, Pass a Mount header to the jupyterhub
     """
-    time.sleep(10)
+    # not ideal, wait for the jhub container to start, update with proper check
+    time.sleep(5)
     client = docker.from_env()
     containers = client.containers.list()
     assert len(containers) > 0
@@ -69,7 +70,12 @@ def tests_auth_hub(image, container):
 @pytest.mark.parametrize('image', [jhub_image], indirect=['image'])
 @pytest.mark.parametrize('container', [jhub_cont], indirect=['container'])
 def test_auth_mount(image, container):
-    time.sleep(10)
+    """
+    Test that the client is able to.
+    - Once authenticated, pass a correctly formatted Mount Header
+    """
+    # not ideal, wait for the jhub container to start, update with proper check
+    time.sleep(5)
     client = docker.from_env()
     containers = client.containers.list()
     assert len(containers) > 0

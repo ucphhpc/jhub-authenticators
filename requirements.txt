@@ -1,4 +1,3 @@
-jupyterhub==0.8.1
-tornado==5.0.2
-traitlets==4.3.2
+jupyterhub==0.9.0
 docutils==0.13.1
+jupyterhub-dummyauthenticator==0.3.1

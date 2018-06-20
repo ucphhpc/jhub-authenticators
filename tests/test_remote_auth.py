@@ -1,8 +1,36 @@
 import requests
 import docker
+import pytest
+from os.path import join, dirname, realpath
+from docker.types import Mount
+
+IMAGE_NAME = "jupyterhub"
+IMAGE_TAG = "test"
+IMAGE = "".join([IMAGE_NAME, ":", IMAGE_TAG])
+
+# root dir
+docker_path = dirname(dirname(realpath(__file__)))
+
+# mount paths
+config_path = join(dirname(realpath(__file__)), 'jupyterhub_config.py')
+
+# image build
+jhub_image = {'path': docker_path, 'tag': IMAGE,
+              'rm': 'True', 'pull': 'True'}
+
+# container cmd
+jhub_cont = {'image': IMAGE, 'name': IMAGE_NAME,
+             'mounts': [Mount(source=config_path,
+                              target='/etc/jupyterhub/jupyterhub_config.py',
+                              read_only=True,
+                              type='bind')],
+             'ports': {8000: 8000},
+             'detach': 'True'}
 
 
-def tests_auth_hub(hub_container):
+@pytest.mark.parametrize('image', [jhub_image], indirect=['image'])
+@pytest.mark.parametrize('container', [jhub_cont], indirect=['container'])
+def tests_auth_hub(image, container):
     """
     Test that the client is able to,
     - Authenticate with the Remote-User header
@@ -12,13 +40,21 @@ def tests_auth_hub(hub_container):
     containers = client.containers.list()
     assert len(containers) > 0
     session = requests.session()
+
+    # wait for jhub to be ready
+    jhub_ready = False
+    while not jhub_ready:
+        resp = session.get("http://127.0.0.1:8000/hub/home")
+        if resp.status_code != 404:
+            jhub_ready = True
+
     # Not allowed, -> not authed
     no_auth_response = session.get("http://127.0.0.1:8000/hub/home")
     assert no_auth_response.status_code == 401
 
     # Auth requests
-    user_cert = '/C=DK/ST=NA/L=NA/O=NBI/OU=NA/CN=Rasmus ' \
-                'Munk/emailAddress=rasmus.munk@nbi.ku.dk'
+    user_cert = '/C=DK/ST=NA/L=NA/O=NBI/OU=NA/CN=Name' \
+                '/emailAddress=mail@sdfsf.com'
     cert_auth_header = {
         'Remote-User': user_cert
     }
@@ -28,18 +64,27 @@ def tests_auth_hub(hub_container):
     assert auth_response.status_code == 200
 
 
-def test_auth_mount(hub_container):
+@pytest.mark.parametrize('image', [jhub_image], indirect=['image'])
+@pytest.mark.parametrize('container', [jhub_cont], indirect=['container'])
+def test_auth_mount(image, container):
     client = docker.from_env()
     containers = client.containers.list()
     assert len(containers) > 0
     session = requests.session()
 
-    no_auth_mount = session.get("http://127.0.0.1:8000/hub/mount")
-    assert no_auth_mount.status_code == 401
+    # wait for jhub to be ready
+    jhub_ready = False
+    while not jhub_ready:
+        resp = session.get("http://127.0.0.1:8000/hub/home")
+        if resp.status_code != 404:
+            jhub_ready = True
+
+    no_auth_mount = session.post("http://127.0.0.1:8000/hub/mount")
+    assert no_auth_mount.status_code == 403
 
     # Auth requests
-    user_cert = '/C=DK/ST=NA/L=NA/O=NBI/OU=NA/CN=Rasmus ' \
-                'Munk/emailAddress=rasmus.munk@nbi.ku.dk'
+    user_cert = '/C=DK/ST=NA/L=NA/O=NBI/OU=NA/CN=Name' \
+                '/emailAddress=mail@sdfsf.com'
 
     cert_auth_header = {
         'Remote-User': user_cert
@@ -49,16 +94,16 @@ def test_auth_mount(hub_container):
                                 headers=cert_auth_header)
     assert auth_response.status_code == 200
 
-    wrong_mig_dict = {'SESSIONS': 's324324234',
+    wrong_mig_dict = {'USER': 's324324234',
                       'WIE': 'dsfsdfs'}
     wrong_mig_header = {
-        'Mig-Mount': str(wrong_mig_dict)
+        'Mount': str(wrong_mig_dict)
     }
 
     # Random key set
-    correct_mig_dict = {'MOUNT_HOST': 'IDMC',
-                        'SESSIONID': 'randomstring_unique_string',
-                        'TARGET_MOUNT_ADDR': '@host.localhost:',
+    correct_mig_dict = {'HOST': 'hostaddr',
+                        'USERNAME': 'randomstring_unique_string',
+                        'PATH': '@host.localhost:',
                         'MOUNTSSHPRIVATEKEY': '''-----BEGIN RSA PRIVATE KEY-----
     MIIEpAIBAAKCAQEA00VP99Nbg6AFrfeByzHtC4G2eLZGDCXP0pBG5tNNmaXKq5sU
     IrDPA7fJczwIfMNlqWeoYjEYg46vbMRxwIDXDDA990JK49+CrpwppxWgSE01WPis
@@ -88,15 +133,15 @@ def test_auth_mount(hub_container):
     -----END RSA PRIVATE KEY-----'''}
 
     correct_mig_header = {
-        'Mig-Mount': str(correct_mig_dict)
+        'Mount': str(correct_mig_dict)
     }
 
     # Invalid mount header
-    auth_mount_response = session.get("http://127.0.0.1:8000/hub/mount",
-                                      headers=wrong_mig_header)
+    auth_mount_response = session.post("http://127.0.0.1:8000/hub/mount",
+                                       headers=wrong_mig_header)
     assert auth_mount_response.status_code == 403
 
     # Valid mount header
-    auth_mount_response = session.get("http://127.0.0.1:8000/hub/mount",
-                                      headers=correct_mig_header)
+    auth_mount_response = session.post("http://127.0.0.1:8000/hub/mount",
+                                       headers=correct_mig_header)
     assert auth_mount_response.status_code == 200

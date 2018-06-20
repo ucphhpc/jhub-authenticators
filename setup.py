@@ -25,20 +25,18 @@ with open(pjoin(here, 'version.py')) as f:
 long_description = open('README.rst').read()
 
 setup(
-    name='jhub_remote_user_auth_mig_mount',
+    name='jhub_remote_auth_mount',
     version=version_ns['__version__'],
     long_description=long_description,
     author="Rasmus Munk",
     author_email="munk1@live.dk",
-    packages=['jhub_remote_user_auth_mig_mount'],
-    url="https://github.com/rasmunk/jhub_remote_user_auth_mig_mount",
+    packages=['jhub_remote_auth_mount'],
+    url="https://github.com/rasmunk/jhub_remote_auth_mount",
     license="GPLv3",
     platforms="Linux, Mac OS X",
     keywords=['Interactive', 'Interpreter', 'Shell', 'Web'],
     install_requires=[
-        'jupyterhub>=0.8.1',
-        'tornado>=5.0.2',
-        'traitlets>=4.3.2',
+        'jupyterhub>=0.9.0',
         'docutils>=0.13.1'
     ],
     classifiers=[

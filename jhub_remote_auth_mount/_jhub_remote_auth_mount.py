@@ -65,49 +65,48 @@ class RemoteUserLoginHandler(BaseHandler):
                 self.redirect(url_path_join(self.hub.server.base_url, 'home'))
 
 
-class MiGMountHandler(BaseHandler):
+class MountHandler(BaseHandler):
     """
-    If the request is properly authenticated, check for Mig-Mount HTTP header,
+    If the request is properly authenticated, check for Mount HTTP header,
     Excepts a string structure that can be interpreted by python
-    The data is set to the user's mig_mount attribute
+    The data is set to the user's mount attribute
     """
 
     @web.authenticated
-    def get(self):
+    def post(self):
         header_name = self.authenticator.mount_header
         mount_header = self.request.headers.get(header_name, "")
         user = self.get_current_user().real_name
         if mount_header == "":
-            raise web.HTTPError(403, "The request must contain a Mig-Mount "
+            raise web.HTTPError(403, "The request must contain a Mount "
                                      "header")
         else:
-            mount_header_dict = None
             try:
                 mount_header_dict = literal_eval(mount_header)
             except ValueError as err:
-                msg = "passed invalid Mig-Mount header format"
+                msg = "passed invalid Mount header format"
                 self.log.error("User: {} - {} - {}".format(user, msg, err))
                 raise web.HTTPError(403, "{}".format(msg))
 
             if type(mount_header_dict) is not dict:
-                msg = "MiG-Mount header must be a dictionary"
+                msg = "Mount header must be a dictionary"
                 self.log.error("User: {} - {}".format(user, msg))
                 raise web.HTTPError(403, "{}".format(msg))
 
-            # Validate required dictionary keys
-            required_keys = ['MOUNT_HOST', 'SESSIONID', 'TARGET_MOUNT_ADDR',
-                             'MOUNTSSHPRIVATEKEY']
+            # Required keys
+            required_keys = ['HOST', 'USERNAME',
+                             'PATH', 'MOUNTSSHPRIVATEKEY']
             missing_keys = [key for key in required_keys if key
                             not in mount_header_dict]
             if len(missing_keys) > 0:
-                msg = "Missing Mig-Mount header keys: {}" \
+                msg = "Missing Mount header keys: {}" \
                     .format(",".join(missing_keys))
                 self.log.error("User: {} - {}".format(user, msg))
                 raise web.HTTPError(403, "{}".format(msg))
 
-            self.log.debug("User: {} - Accepted MiG mount header: {}"
+            self.log.debug("User: {} - Accepted mount header: {}"
                            .format(user, mount_header_dict))
-            self.get_current_user().mig_mount = mount_header_dict
+            self.get_current_user().mount = mount_header_dict
             self.redirect(url_path_join(self.hub.server.base_url, 'home'))
 
 
@@ -151,11 +150,11 @@ class RemoteUserLocalAuthenticator(LocalAuthenticator):
         raise NotImplementedError()
 
 
-class MIGMountRemoteUserAuthenticator(RemoteUserAuthenticator):
+class MountRemoteUserAuthenticator(RemoteUserAuthenticator):
     """
     Accept the authenticated user name from the Remote-User HTTP header.
-    In addition to this it also allows MiG to pass user mount data that allows
-    the jhub to mount the MiG home drive for that particular user
+    In addition to this it also allows Mount to pass user mount data that allows
+    the jhub to mount an external storage
     """
     header_name = Unicode(
         default_value='Remote-User',
@@ -163,7 +162,7 @@ class MIGMountRemoteUserAuthenticator(RemoteUserAuthenticator):
         help="""HTTP header to inspect for the authenticated username.""")
 
     mount_header = Unicode(
-        default_value='Mig-Mount',
+        default_value='Mount',
         config=True,
         help="""HTTP header to inspect for the users mount information"""
     )
@@ -175,7 +174,7 @@ class MIGMountRemoteUserAuthenticator(RemoteUserAuthenticator):
             (app.base_url[:-1], PartialBaseURLHandler),
             (app.base_url, PartialBaseURLHandler),
             (r'/login', RemoteUserLoginHandler),
-            (r'/mount', MiGMountHandler),
+            (r'/mount', MountHandler),
         ]
 
     @gen.coroutine

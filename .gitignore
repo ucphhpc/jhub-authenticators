@@ -6,3 +6,6 @@ build/
 dist/
 .idea/
 .cache/
+
+.pytest_cache/
+build/

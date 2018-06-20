@@ -103,14 +103,14 @@ def test_auth_mount(image, container):
                                 headers=cert_auth_header)
     assert auth_response.status_code == 200
 
-    wrong_mig_dict = {'USER': 's324324234',
+    wrong_dict = {'USER': 's324324234',
                       'WIE': 'dsfsdfs'}
-    wrong_mig_header = {
-        'Mount': str(wrong_mig_dict)
+    wrong_header = {
+        'Mount': str(wrong_dict)
     }
 
     # Random key set
-    correct_mig_dict = {'HOST': 'hostaddr',
+    correct_dict = {'HOST': 'hostaddr',
                         'USERNAME': 'randomstring_unique_string',
                         'PATH': '@host.localhost:',
                         'MOUNTSSHPRIVATEKEY': '''-----BEGIN RSA PRIVATE KEY-----
@@ -141,16 +141,16 @@ def test_auth_mount(image, container):
     ojR4eIsIc//+fVpkr56fg2OUGhmI+jw87k9hG5uxgBCqOAJuWjEo7A==
     -----END RSA PRIVATE KEY-----'''}
 
-    correct_mig_header = {
-        'Mount': str(correct_mig_dict)
+    correct_header = {
+        'Mount': str(correct_dict)
     }
 
     # Invalid mount header
     auth_mount_response = session.post("http://127.0.0.1:8000/hub/mount",
-                                       headers=wrong_mig_header)
+                                       headers=wrong_header)
     assert auth_mount_response.status_code == 403
 
     # Valid mount header
     auth_mount_response = session.post("http://127.0.0.1:8000/hub/mount",
-                                       headers=correct_mig_header)
+                                       headers=correct_header)
     assert auth_mount_response.status_code == 200

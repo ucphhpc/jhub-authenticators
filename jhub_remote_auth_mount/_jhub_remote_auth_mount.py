@@ -54,7 +54,7 @@ class RemoteUserLoginHandler(BaseHandler):
         if remote_user == "":
             raise web.HTTPError(401, "You are not authenticated to do this")
         else:
-            safe_user = safeinput_encode(remote_user)
+            safe_user = safeinput_encode(remote_user).lower()
             user = self.user_from_username(safe_user)
             user.real_name = remote_user
             self.set_login_cookie(user)
@@ -95,7 +95,7 @@ class MountHandler(BaseHandler):
 
             # Required keys
             required_keys = ['HOST', 'USERNAME',
-                             'PATH', 'MOUNTSSHPRIVATEKEY']
+                             'PATH', 'PRIVATEKEY']
             missing_keys = [key for key in required_keys if key
                             not in mount_header_dict]
             if len(missing_keys) > 0:

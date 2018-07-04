@@ -56,7 +56,7 @@ class RemoteUserLoginHandler(BaseHandler):
             raise web.HTTPError(401, "You are not authenticated to do this")
         else:
             # strip special chars
-            remote_user = ''.join(e for e in remote_user if e.isalnum())
+            remote_user = ''.join(e for e in remote_user if e.isalnum()).lower()
             safe_user = safeinput_encode(remote_user).lower()
             user = self.user_from_username(safe_user)
             user.real_name = remote_user

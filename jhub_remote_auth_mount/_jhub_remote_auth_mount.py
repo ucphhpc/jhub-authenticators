@@ -42,18 +42,21 @@ class PartialBaseURLHandler(BaseHandler):
     """
     Fix against /base_url requests are not redirected to /base_url/home
     """
-
+    @web.authenticated
     def get(self):
         self.redirect(url_path_join(self.hub.server.base_url, 'home'))
 
 
 class RemoteUserLoginHandler(BaseHandler):
-    def get(self):
+
+    def prepare(self):
         header_name = self.authenticator.header_name
         remote_user = self.request.headers.get(header_name, "")
         if remote_user == "":
             raise web.HTTPError(401, "You are not authenticated to do this")
         else:
+            # strip special chars
+            remote_user = ''.join(e for e in remote_user if e.isalnum())
             safe_user = safeinput_encode(remote_user).lower()
             user = self.user_from_username(safe_user)
             user.real_name = remote_user

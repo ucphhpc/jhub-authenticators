@@ -62,8 +62,8 @@ def tests_auth_hub(image, container):
         'Remote-User': user_cert
     }
 
-    auth_response = session.get("http://127.0.0.1:8000/hub/login",
-                                headers=cert_auth_header)
+    auth_response = session.post("http://127.0.0.1:8000/hub/login",
+                                 headers=cert_auth_header)
     assert auth_response.status_code == 200
 
 
@@ -99,8 +99,8 @@ def test_auth_mount(image, container):
         'Remote-User': user_cert
     }
 
-    auth_response = session.get("http://127.0.0.1:8000/hub/login",
-                                headers=cert_auth_header)
+    auth_response = session.post("http://127.0.0.1:8000/hub/login",
+                                 headers=cert_auth_header)
     assert auth_response.status_code == 200
 
     wrong_header = {

@@ -58,6 +58,7 @@ class RemoteUserLoginHandler(BaseHandler):
             user = self.user_from_username(safe_user)
             user.real_name = remote_user
             self.set_login_cookie(user)
+            self.log.info("User: {}-{} - Login".format(user, user.real_name))
             argument = self.get_argument("next", None, True)
             if argument is not None:
                 self.redirect(argument)
@@ -76,7 +77,7 @@ class MountHandler(BaseHandler):
     def post(self):
         header_name = self.authenticator.mount_header
         mount_header = self.request.headers.get(header_name, "")
-        user = self.get_current_user().real_name
+        user = self.get_current_user()
         if mount_header == "":
             raise web.HTTPError(403, "The request must contain a Mount "
                                      "header")
@@ -85,27 +86,17 @@ class MountHandler(BaseHandler):
                 mount_header_dict = literal_eval(mount_header)
             except ValueError as err:
                 msg = "passed invalid Mount header format"
-                self.log.error("User: {} - {} - {}".format(user, msg, err))
+                self.log.error("User: {}-{} - {} - {}".format(user, user.real_name,
+                                                              msg, err))
                 raise web.HTTPError(403, "{}".format(msg))
 
             if type(mount_header_dict) is not dict:
                 msg = "Mount header must be a dictionary"
-                self.log.error("User: {} - {}".format(user, msg))
+                self.log.error("User: {}-{} - {}".format(user, user.real_name, msg))
                 raise web.HTTPError(403, "{}".format(msg))
 
-            # Required keys
-            required_keys = ['HOST', 'USERNAME',
-                             'PATH', 'PRIVATEKEY']
-            missing_keys = [key for key in required_keys if key
-                            not in mount_header_dict]
-            if len(missing_keys) > 0:
-                msg = "Missing Mount header keys: {}" \
-                    .format(",".join(missing_keys))
-                self.log.error("User: {} - {}".format(user, msg))
-                raise web.HTTPError(403, "{}".format(msg))
-
-            self.log.debug("User: {} - Accepted mount header: {}"
-                           .format(user, mount_header_dict))
+            self.log.info("User: {}-{} - Accepted mount header: {}"
+                          .format(user, user.real_name, mount_header_dict))
             self.get_current_user().mount = mount_header_dict
             self.redirect(url_path_join(self.hub.server.base_url, 'home'))
 

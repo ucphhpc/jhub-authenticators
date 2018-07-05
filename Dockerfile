@@ -1,4 +1,4 @@
-FROM jupyterhub/jupyterhub:0.9.0
+FROM jupyterhub/jupyterhub:0.9.1
 
 ADD jhub_remote_auth_mount /app/jhub_remote_auth_mount
 ADD setup.py /app/setup.py

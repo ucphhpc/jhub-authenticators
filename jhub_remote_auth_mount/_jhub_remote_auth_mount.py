@@ -59,9 +59,9 @@ class RemoteUserLoginHandler(BaseHandler):
             remote_user = ''.join(e for e in remote_user if e.isalnum()).lower()
             safe_user = safeinput_encode(remote_user).lower()
             user = self.user_from_username(safe_user)
-            user.real_name = remote_user
+            user.name = remote_user
             self.set_login_cookie(user)
-            self.log.info("User: {}-{} - Login".format(user, user.real_name))
+            self.log.info("User: {}-{} - Login".format(user, user.name))
             argument = self.get_argument("next", None, True)
             if argument is not None:
                 self.redirect(argument)
@@ -89,17 +89,17 @@ class MountHandler(BaseHandler):
                 mount_header_dict = literal_eval(mount_header)
             except ValueError as err:
                 msg = "passed invalid Mount header format"
-                self.log.error("User: {}-{} - {} - {}".format(user, user.real_name,
+                self.log.error("User: {}-{} - {} - {}".format(user, user.name,
                                                               msg, err))
                 raise web.HTTPError(403, "{}".format(msg))
 
             if type(mount_header_dict) is not dict:
                 msg = "Mount header must be a dictionary"
-                self.log.error("User: {}-{} - {}".format(user, user.real_name, msg))
+                self.log.error("User: {}-{} - {}".format(user, user.name, msg))
                 raise web.HTTPError(403, "{}".format(msg))
 
             self.log.info("User: {}-{} - Accepted mount header: {}"
-                          .format(user, user.real_name, mount_header_dict))
+                          .format(user, user.name, mount_header_dict))
             self.get_current_user().mount = mount_header_dict
             self.redirect(url_path_join(self.hub.server.base_url, 'home'))
 

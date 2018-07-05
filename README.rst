@@ -69,9 +69,8 @@ After being successfully evaluated to a dictionary, the header is required to co
         USERNAME: 'A random string that identifies an active mount session',
         PATH: 'The target URL of the system/service that grants jupyter users to mount
         their notebook against, e.g @idmc.dk:',
-        MOUNTSSHPRIVATEKEY: 'private key',
+        PRIVATEKEY: 'private key'
     }
-
 Note:
 =====
 Since we are passing private key's over the network, it is important that this information is sent over an encrypted channel, furthermore the host/service that grant this mount information should limit the validity of a keyset, e.g. can be used for 2 hours before a new set has to be generated and the old is void.

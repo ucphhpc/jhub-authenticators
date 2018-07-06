@@ -4,7 +4,7 @@ language: python
 python: '3.6'
 install:
 - pip install -r tests/requirements.txt
-- docker pull jupyterhub/jupyterhub:0.9.0
+- docker pull jupyterhub/jupyterhub:0.9.1
 script:
 - python setup.py check -rms
 - flake8

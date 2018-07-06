@@ -36,7 +36,7 @@ setup(
     platforms="Linux, Mac OS X",
     keywords=['Interactive', 'Interpreter', 'Shell', 'Web'],
     install_requires=[
-        'jupyterhub>=0.9.0',
+        'jupyterhub>=0.9.1',
         'docutils>=0.13.1'
     ],
     classifiers=[

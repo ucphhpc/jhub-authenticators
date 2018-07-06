@@ -58,12 +58,22 @@ def tests_auth_hub(image, container):
     # Auth requests
     user_cert = '/C=DK/ST=NA/L=NA/O=NBI/OU=NA/CN=Name' \
                 '/emailAddress=mail@sdfsf.com'
+    other_user = 'idfsf'
+
     cert_auth_header = {
         'Remote-User': user_cert
     }
 
+    other_auth_header = {
+        'Remote-User': other_user
+    }
+
     auth_response = session.post("http://127.0.0.1:8000/hub/login",
                                  headers=cert_auth_header)
+    assert auth_response.status_code == 200
+
+    auth_response = session.get("http://127.0.0.1:8000/hub/home",
+                                headers=other_auth_header)
     assert auth_response.status_code == 200
 
 
@@ -99,9 +109,13 @@ def test_auth_mount(image, container):
         'Remote-User': user_cert
     }
 
-    auth_response = session.post("http://127.0.0.1:8000/hub/login",
-                                 headers=cert_auth_header)
+    auth_response = session.get("http://127.0.0.1:8000/hub/home",
+                                headers=cert_auth_header)
     assert auth_response.status_code == 200
+
+    # auth_response = session.post("http://127.0.0.1:8000/hub/login",
+    #                              headers=cert_auth_header)
+    # assert auth_response.status_code == 200
 
     wrong_header = {
         'Mount': "SDfssdfsesdfsfdsdfsxv"

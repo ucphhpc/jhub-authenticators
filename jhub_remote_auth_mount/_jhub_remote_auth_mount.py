@@ -4,7 +4,7 @@ from jupyterhub.auth import Authenticator
 from jupyterhub.auth import LocalAuthenticator
 from jupyterhub.utils import url_path_join
 from tornado import gen, web
-from traitlets import Unicode
+from traitlets import Unicode, List
 from ast import literal_eval
 
 
@@ -38,6 +38,18 @@ def safeinput_decode(input_str):
     return str(b32decode(bytes(decode_str, 'utf-8')), 'utf-8')
 
 
+def extract_headers(request, headers):
+    user_data = {}
+    for i, header in enumerate(headers):
+        value = request.headers.get(header, "")
+        if value:
+            try:
+                user_data[header] = value
+            except KeyError:
+                pass
+    return user_data
+
+
 class PartialBaseURLHandler(BaseHandler):
     """
     Fix against /base_url requests are not redirected to /base_url/home
@@ -49,24 +61,25 @@ class PartialBaseURLHandler(BaseHandler):
 
 class RemoteUserLoginHandler(BaseHandler):
 
-    def prepare(self):
-        header_name = self.authenticator.header_name
-        remote_user = self.request.headers.get(header_name, "")
-        if remote_user == "":
+    async def prepare(self):
+        """login user"""
+        user_data = extract_headers(self.request, self.authenticator.auth_headers)
+        if 'Remote-User' not in user_data:
             raise web.HTTPError(401, "You are not authenticated to do this")
+
+        name = ''.join(e for e in user_data['Remote-User'] if e.isalnum()).lower()
+        user_data['Remote-User'] = safeinput_encode(user_data['Remote-User']).lower()
+        user = await self.login_user(user_data)
+        if user is None:
+            raise web.HTTPError(403, "Failed to login")
+        user.name = name
+        self.log.info("User: {}-{} - Login".format(user, user.name))
+
+        argument = self.get_argument("next", None, True)
+        if argument is not None:
+            self.redirect(argument)
         else:
-            # strip special chars
-            remote_user = ''.join(e for e in remote_user if e.isalnum()).lower()
-            safe_user = safeinput_encode(remote_user).lower()
-            user = self.user_from_username(safe_user)
-            user.name = remote_user
-            self.set_login_cookie(user)
-            self.log.info("User: {}-{} - Login".format(user, user.name))
-            argument = self.get_argument("next", None, True)
-            if argument is not None:
-                self.redirect(argument)
-            else:
-                self.redirect(url_path_join(self.hub.server.base_url, 'home'))
+            self.redirect(url_path_join(self.hub.server.base_url, 'home'))
 
 
 class MountHandler(BaseHandler):
@@ -77,20 +90,18 @@ class MountHandler(BaseHandler):
     """
 
     @web.authenticated
-    def post(self):
-        header_name = self.authenticator.mount_header
-        mount_header = self.request.headers.get(header_name, "")
-        user = self.get_current_user()
-        if mount_header == "":
+    async def post(self):
+        mount_data = extract_headers(self.request, self.authenticator.mount_headers)
+        if 'Mount' not in mount_data:
             raise web.HTTPError(403, "The request must contain a Mount "
                                      "header")
         else:
+            user = self.get_current_user()
             try:
-                mount_header_dict = literal_eval(mount_header)
+                mount_header_dict = literal_eval(mount_data['Mount'])
             except ValueError as err:
                 msg = "passed invalid Mount header format"
-                self.log.error("User: {}-{} - {} - {}".format(user, user.name,
-                                                              msg, err))
+                self.log.error("User: {}-{} - {}-{}".format(user, user.name, msg, err))
                 raise web.HTTPError(403, "{}".format(msg))
 
             if type(mount_header_dict) is not dict:
@@ -150,27 +161,32 @@ class MountRemoteUserAuthenticator(RemoteUserAuthenticator):
     In addition to this it also allows Mount to pass user mount data that allows
     the jhub to mount an external storage
     """
-    header_name = Unicode(
-        default_value='Remote-User',
-        config=True,
-        help="""HTTP header to inspect for the authenticated username.""")
 
-    mount_header = Unicode(
-        default_value='Mount',
+    auth_headers = List(
+        default_value=['Remote-User'],
         config=True,
-        help="""HTTP header to inspect for the users mount information"""
+        help="""List of allowed HTTP headers to get from user data"""
+    )
+
+    mount_headers = List(
+        default_value=['Mount'],
+        config=True,
+        help="""List of allowed mount headers"""
     )
 
     # These paths are an extension of the prefix base url e.g. /dag/hub
     def get_handlers(self, app):
         # redirect baseurl e.g. /hub/ and /hub to /hub/home
         return [
-            (app.base_url[:-1], PartialBaseURLHandler),
-            (app.base_url, PartialBaseURLHandler),
+            # (app.base_url[:-1], PartialBaseURLHandler),
+            # (app.base_url, PartialBaseURLHandler),
             (r'/login', RemoteUserLoginHandler),
             (r'/mount', MountHandler),
         ]
 
-    @gen.coroutine
-    def authenticate(self, *args):
-        raise NotImplemented()
+    async def authenticate(self, handler, data):
+        user_data = {
+            'name': data['Remote-User'],
+            'auth_state': data
+        }
+        return user_data

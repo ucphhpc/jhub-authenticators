@@ -62,17 +62,8 @@ The expected format of the Mount header is that the passed string can be evaluat
             try:
                 mount_header_dict = literal_eval(mount_header)
 
-After being successfully evaluated to a dictionary, the header is required to contain the following information::
-
-    {
-        HOST: 'hostname of the target mount host',
-        USERNAME: 'A random string that identifies an active mount session',
-        PATH: 'The target URL of the system/service that grants jupyter users to mount
-        their notebook against, e.g @idmc.dk:',
-        PRIVATEKEY: 'private key'
-    }
+The internal format of the Mount header is not evaluated, this is dependent on the underlying mount implementation and should be verified there.
 
 Note:
 =====
-Since we are passing private key's over the network, it is important that this information is sent over an encrypted channel, furthermore the host/service that grant this mount information should limit the validity of a keyset, e.g. can be used for 2 hours before a new set has to be generated and the old is void.
 Upon successful parsing of the header, the active jupyterhub user instance is appended with a 'mount' property that contains the accepted dictionary header.

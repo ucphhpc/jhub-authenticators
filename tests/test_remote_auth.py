@@ -168,5 +168,3 @@ def test_auth_mount(image, container):
     auth_mount_response = session.post("http://127.0.0.1:8000/hub/mount",
                                        headers=correct_header)
     assert auth_mount_response.status_code == 200
-
-

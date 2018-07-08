@@ -55,6 +55,7 @@ class PartialBaseURLHandler(BaseHandler):
     Fix against /base_url requests are not redirected to /base_url/home
     """
     @web.authenticated
+    @gen.coroutine
     def get(self):
         self.redirect(url_path_join(self.hub.server.base_url, 'home'))
 
@@ -71,7 +72,8 @@ class RemoteUserLogoutHandler(BaseHandler):
 
 class RemoteUserLoginHandler(BaseHandler):
 
-    async def prepare(self):
+    @gen.coroutine
+    def prepare(self):
         self.log.info("Preparing")
         """ login user """
         user_data = extract_headers(self.request, self.authenticator.auth_headers)
@@ -101,7 +103,8 @@ class MountHandler(BaseHandler):
     """
 
     @web.authenticated
-    async def post(self):
+    @gen.coroutine
+    def post(self):
         mount_data = extract_headers(self.request, self.authenticator.mount_headers)
         if 'Mount' not in mount_data:
             raise web.HTTPError(403, "The request must contain a Mount "

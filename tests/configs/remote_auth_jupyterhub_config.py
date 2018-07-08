@@ -3,4 +3,4 @@
 c = get_config()
 
 c.JupyterHub.hub_ip = '0.0.0.0'
-c.JupyterHub.authenticator_class = 'jhub_remote_auth_mount.MountRemoteUserAuthenticator'
+c.JupyterHub.authenticator_class = 'jhubauthenticators.MountRemoteUserAuthenticator'

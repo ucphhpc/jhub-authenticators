@@ -1,2 +1,4 @@
 jupyterhub==0.9.1
 docutils==0.14
+tornado==5.0.2
+traitlets==4.3.2

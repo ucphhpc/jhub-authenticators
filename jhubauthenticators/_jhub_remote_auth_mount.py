@@ -59,22 +59,33 @@ class PartialBaseURLHandler(BaseHandler):
         self.redirect(url_path_join(self.hub.server.base_url, 'home'))
 
 
+class RemoteUserLogoutHandler(BaseHandler):
+
+    @gen.coroutine
+    def get(self):
+        user = self.get_current_user()
+        if user:
+            self.clear_login_cookie()
+        self.redirect(self.hub.server.base_url)
+
+
 class RemoteUserLoginHandler(BaseHandler):
 
     async def prepare(self):
-        """login user"""
+        self.log.info("Preparing")
+        """ login user """
         user_data = extract_headers(self.request, self.authenticator.auth_headers)
         if 'Remote-User' not in user_data:
             raise web.HTTPError(401, "You are not authenticated to do this")
 
         name = ''.join(e for e in user_data['Remote-User'] if e.isalnum()).lower()
         user_data['Remote-User'] = safeinput_encode(user_data['Remote-User']).lower()
-        user = await self.login_user(user_data)
-        if user is None:
-            raise web.HTTPError(403, "Failed to login")
+        user = self.user_from_username(user_data['Remote-User'])
         user.name = name
-        self.log.info("User: {}-{} - Login".format(user, user.name))
+        # Login
+        self.set_login_cookie(user)
 
+        self.log.info("User: {}-{} - Login".format(user, user.name))
         argument = self.get_argument("next", None, True)
         if argument is not None:
             self.redirect(argument)
@@ -127,6 +138,7 @@ class RemoteUserAuthenticator(Authenticator):
     def get_handlers(self, app):
         return [
             (r'/login', RemoteUserLoginHandler),
+            (r'/logout', RemoteUserLogoutHandler)
         ]
 
     @gen.coroutine
@@ -148,6 +160,7 @@ class RemoteUserLocalAuthenticator(LocalAuthenticator):
     def get_handlers(self, app):
         return [
             (r'/login', RemoteUserLoginHandler),
+            (r'/logout', RemoteUserLogoutHandler)
         ]
 
     @gen.coroutine
@@ -178,15 +191,13 @@ class MountRemoteUserAuthenticator(RemoteUserAuthenticator):
     def get_handlers(self, app):
         # redirect baseurl e.g. /hub/ and /hub to /hub/home
         return [
-            # (app.base_url[:-1], PartialBaseURLHandler),
-            # (app.base_url, PartialBaseURLHandler),
+            (app.base_url[:-1], PartialBaseURLHandler),
+            (app.base_url, PartialBaseURLHandler),
             (r'/login', RemoteUserLoginHandler),
+            (r'/logout', RemoteUserLogoutHandler),
             (r'/mount', MountHandler),
         ]
 
-    async def authenticate(self, handler, data):
-        user_data = {
-            'name': data['Remote-User'],
-            'auth_state': data
-        }
-        return user_data
+    @gen.coroutine
+    def authenticate(self, *args):
+        raise NotImplementedError()

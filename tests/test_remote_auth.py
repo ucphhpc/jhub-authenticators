@@ -13,7 +13,8 @@ IMAGE = "".join([IMAGE_NAME, ":", IMAGE_TAG])
 docker_path = dirname(dirname(realpath(__file__)))
 
 # mount paths
-config_path = join(dirname(realpath(__file__)), 'jupyterhub_config.py')
+config_path = join(dirname(realpath(__file__)), 'configs',
+                   'remote_auth_jupyterhub_config.py')
 
 # image build
 jhub_image = {'path': docker_path, 'tag': IMAGE,
@@ -167,3 +168,5 @@ def test_auth_mount(image, container):
     auth_mount_response = session.post("http://127.0.0.1:8000/hub/mount",
                                        headers=correct_header)
     assert auth_mount_response.status_code == 200
+
+

@@ -25,13 +25,13 @@ with open(pjoin(here, 'version.py')) as f:
 long_description = open('README.rst').read()
 
 setup(
-    name='jhub_remote_auth_mount',
+    name='jhub-authenticators',
     version=version_ns['__version__'],
     long_description=long_description,
     author="Rasmus Munk",
     author_email="munk1@live.dk",
-    packages=['jhub_remote_auth_mount'],
-    url="https://github.com/rasmunk/jhub_remote_auth_mount",
+    packages=['jhubauthenticators'],
+    url="https://github.com/rasmunk/jhub-authenticators",
     license="GPLv3",
     platforms="Linux, Mac OS X",
     keywords=['Interactive', 'Interpreter', 'Shell', 'Web'],

@@ -1,8 +1,8 @@
-.. image:: https://travis-ci.org/rasmunk/jhub_remote_auth_mount.svg?branch=master
-    :target: https://travis-ci.org/rasmunk/jhub_remote_auth_mount
+.. image:: https://travis-ci.org/rasmunk/jhub-authenticators.svg?branch=master
+    :target: https://travis-ci.org/rasmunk/jhub-authenticators
 
 ====================================
-Jupyterhub REMOTE_USER Authenticator
+Jupyterhub Remote-User Authenticator
 ====================================
 
 Authenticate to Jupyterhub using an authenticating proxy that can set

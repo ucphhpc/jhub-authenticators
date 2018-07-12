@@ -76,11 +76,15 @@ class RemoteUserLoginHandler(BaseHandler):
     def prepare(self):
         self.log.info("Preparing")
         """ login user """
-        user_data = extract_headers(self.request, self.authenticator.auth_headers)
-        if 'Remote-User' not in user_data:
-            raise web.HTTPError(401, "You are not authenticated to do this")
+        if self.get_current_user() is not None:
+            self.log.info("User: {} is already authenticated"
+                          .format(self.get_current_user(), self.get_current_user().name))
+            self.redirect(url_path_join(self.hub.server.base_url, 'home'))
+        else:
+            user_data = extract_headers(self.request, self.authenticator.auth_headers)
+            if 'Remote-User' not in user_data:
+                raise web.HTTPError(401, "You are not authenticated to do this")
 
-        if self.get_current_user() is None:
             # Login
             name = ''.join(e for e in user_data['Remote-User'] if e.isalnum()).lower()
             user_data['Remote-User'] = safeinput_encode(user_data['Remote-User']).lower()
@@ -88,15 +92,12 @@ class RemoteUserLoginHandler(BaseHandler):
             user.name = name
             self.set_login_cookie(user)
             self.log.info("User: {}-{} - Login".format(user, user.name))
-        else:
-            self.log.info("User: {} is already authenticated"
-                          .format(self.get_current_user(), self.get_current_user().name))
 
-        argument = self.get_argument("next", None, True)
-        if argument is not None:
-            self.redirect(argument)
-        else:
-            self.redirect(url_path_join(self.hub.server.base_url, 'home'))
+            argument = self.get_argument("next", None, True)
+            if argument is not None:
+                self.redirect(argument)
+            else:
+                self.redirect(url_path_join(self.hub.server.base_url, 'home'))
 
 
 class MountHandler(BaseHandler):

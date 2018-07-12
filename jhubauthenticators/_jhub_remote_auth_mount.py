@@ -192,10 +192,7 @@ class MountRemoteUserAuthenticator(RemoteUserAuthenticator):
 
     # These paths are an extension of the prefix base url e.g. /dag/hub
     def get_handlers(self, app):
-        # redirect baseurl e.g. /hub/ and /hub to /hub/home
         return [
-            (app.base_url[:-1], PartialBaseURLHandler),
-            (app.base_url, PartialBaseURLHandler),
             (r'/login', RemoteUserLoginHandler),
             (r'/logout', RemoteUserLogoutHandler),
             (r'/mount', MountHandler),

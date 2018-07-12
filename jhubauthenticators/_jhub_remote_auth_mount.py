@@ -89,8 +89,8 @@ class RemoteUserLoginHandler(BaseHandler):
             self.set_login_cookie(user)
             self.log.info("User: {}-{} - Login".format(user, user.name))
         else:
-            self.log.info("User: {}-{} is already authenticated").format(self.get_current_user(),
-                                                                         self.get_current_user().name)
+            self.log.info("User: {}-{} is already authenticated")\
+                .format(self.get_current_user(), self.get_current_user().name)
 
         argument = self.get_argument("next", None, True)
         if argument is not None:

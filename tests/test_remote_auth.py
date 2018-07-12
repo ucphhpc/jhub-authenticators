@@ -45,15 +45,16 @@ def tests_auth_hub(image, container):
     assert len(containers) > 0
     session = requests.session()
 
+    jhub_base_url = 'http://127.0.0.1:8000/hub'
     # wait for jhub to be ready
     jhub_ready = False
     while not jhub_ready:
-        resp = session.get("http://127.0.0.1:8000/hub/home")
+        resp = session.get(''.join([jhub_base_url, '/home']))
         if resp.status_code != 404:
             jhub_ready = True
 
     # Not allowed, -> not authed
-    no_auth_response = session.get("http://127.0.0.1:8000/hub/home")
+    no_auth_response = session.get(''.join([jhub_base_url, '/home']))
     assert no_auth_response.status_code == 401
 
     # Auth requests
@@ -69,11 +70,11 @@ def tests_auth_hub(image, container):
         'Remote-User': other_user
     }
 
-    auth_response = session.post("http://127.0.0.1:8000/hub/login",
+    auth_response = session.post(''.join([jhub_base_url, '/login']),
                                  headers=cert_auth_header)
     assert auth_response.status_code == 200
 
-    auth_response = session.get("http://127.0.0.1:8000/hub/home",
+    auth_response = session.get(''.join([jhub_base_url, '/home']),
                                 headers=other_auth_header)
     assert auth_response.status_code == 200
 
@@ -92,14 +93,15 @@ def test_auth_mount(image, container):
     assert len(containers) > 0
     session = requests.session()
 
+    jhub_base_url = 'http://127.0.0.1:8000/hub'
     # wait for jhub to be ready
     jhub_ready = False
     while not jhub_ready:
-        resp = session.get("http://127.0.0.1:8000/hub/home")
+        resp = session.get(''.join([jhub_base_url, '/home']))
         if resp.status_code != 404:
             jhub_ready = True
 
-    no_auth_mount = session.post("http://127.0.0.1:8000/hub/mount")
+    no_auth_mount = session.post(''.join([jhub_base_url, '/mount']))
     assert no_auth_mount.status_code == 403
 
     # Auth requests
@@ -110,7 +112,7 @@ def test_auth_mount(image, container):
         'Remote-User': user_cert
     }
 
-    auth_response = session.get("http://127.0.0.1:8000/hub/home",
+    auth_response = session.get(''.join([jhub_base_url, '/home']),
                                 headers=cert_auth_header)
     assert auth_response.status_code == 200
 
@@ -160,11 +162,11 @@ def test_auth_mount(image, container):
     }
 
     # Invalid mount header
-    auth_mount_response = session.post("http://127.0.0.1:8000/hub/mount",
+    auth_mount_response = session.post(''.join([jhub_base_url, '/mount']),
                                        headers=wrong_header)
     assert auth_mount_response.status_code == 403
 
     # Valid mount header
-    auth_mount_response = session.post("http://127.0.0.1:8000/hub/mount",
+    auth_mount_response = session.post(''.join([jhub_base_url, '/mount']),
                                        headers=correct_header)
     assert auth_mount_response.status_code == 200

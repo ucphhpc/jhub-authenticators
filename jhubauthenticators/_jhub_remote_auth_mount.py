@@ -80,14 +80,18 @@ class RemoteUserLoginHandler(BaseHandler):
         if 'Remote-User' not in user_data:
             raise web.HTTPError(401, "You are not authenticated to do this")
 
-        name = ''.join(e for e in user_data['Remote-User'] if e.isalnum()).lower()
-        user_data['Remote-User'] = safeinput_encode(user_data['Remote-User']).lower()
-        user = self.user_from_username(user_data['Remote-User'])
-        user.name = name
-        # Login
-        self.set_login_cookie(user)
+        if self.get_current_user() is None:
+            # Login
+            name = ''.join(e for e in user_data['Remote-User'] if e.isalnum()).lower()
+            user_data['Remote-User'] = safeinput_encode(user_data['Remote-User']).lower()
+            user = self.user_from_username(user_data['Remote-User'])
+            user.name = name
+            self.set_login_cookie(user)
+            self.log.info("User: {}-{} - Login".format(user, user.name))
+        else:
+            self.log.info("User: {}-{} is already authenticated").format(self.get_current_user(),
+                                                                         self.get_current_user().name)
 
-        self.log.info("User: {}-{} - Login".format(user, user.name))
         argument = self.get_argument("next", None, True)
         if argument is not None:
             self.redirect(argument)

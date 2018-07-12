@@ -56,9 +56,11 @@ def test_dummy_auth(image, container):
 
         # login
         user = "a-new-user"
-        # next to hub/home, else the login by default will return 500 because it will
-        # try and start a server right away with the new user
-        # Which fails because the default spawner requires a matching local username
+        # next to hub/home, else the login by
+        #  default will return 500 because it will
+        #  try and start a server right away with the new user
+        # Which fails because the default
+        #  spawner requires a matching local username
         login_response = s.post(JHUB_URL + "/hub/login?next=/hub/home",
                                 data={"username": user,
                                       "password": "password"})

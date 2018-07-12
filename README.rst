@@ -1,4 +1,4 @@
-.. image:: https://travis-ci.org/rasmunk/jhub-authenticators.svg?branch=master
+.. image:: https://travis-ci.org/rasmunk/jhub-authenticators.svg?branch=devel
     :target: https://travis-ci.org/rasmunk/jhub-authenticators
 
 ====================================
@@ -16,11 +16,11 @@ Installation
 
 Installation from pypi::
 
-    pip install jhub_remote_auth_mount
+    pip install jhub-authenticators
 
 Installation from local git repository::
 
-    cd jhub_remote_auth_mount
+    cd jhub-authenticators
     pip install .
 
 -------------
@@ -30,7 +30,7 @@ Configuration
 You should edit your `jupyterhub_config.py` config file to set the
 authenticator class::
 
-    c.JupyterHub.authenticator_class = 'jhub_remote_auth_mount.RemoteUserAuthenticator'
+    c.JupyterHub.authenticator_class = 'jhub-authenticators.RemoteUserAuthenticator'
 
 You should be able to start jupyterhub.  The "/login" resource
 will look for the authenticated user name in the HTTP header "Remote-User".
@@ -38,7 +38,7 @@ If found, and not blank, you will be logged in as that user.
 
 Alternatively, you can use `RemoteUserLocalAuthenticator`::
 
-    c.JupyterHub.authenticator_class = 'jhub_remote_auth_mount.RemoteUserLocalAuthenticator'
+    c.JupyterHub.authenticator_class = 'jhub-authenticators.RemoteUserLocalAuthenticator'
 
 This provides the same authentication functionality but is derived from
 `LocalAuthenticator` and therefore provides features such as the ability
@@ -50,7 +50,7 @@ Remote User Authentication extended with Mount capability
 
 Provides the capability to supply the jupyterhub user with a set of ssh keys that can later be used to mount that particular user's homedrive, the extended authenticator can be activated by setting the following option in the jupyterhub config file::
 
-    c.JupyterHub.authenticator_class = 'jhub_remote_auth_mount.MountRemoteUserAuthenticator'
+    c.JupyterHub.authenticator_class = 'jhub-authenticators.MountRemoteUserAuthenticator'
     
 This adds two base request paths to the jupyterhub web application::
 

@@ -208,5 +208,3 @@ class MountRemoteUserAuthenticator(RemoteUserAuthenticator):
         }
         self.log.info("Authenticated: {} - Login".format(user))
         return user
-
-

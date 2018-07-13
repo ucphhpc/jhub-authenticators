@@ -74,7 +74,6 @@ class RemoteUserLoginHandler(BaseHandler):
 
     @gen.coroutine
     def prepare(self):
-        self.log.info("Preparing")
         """ login user """
         if self.get_current_user() is not None:
             self.log.info("User: {} is already authenticated"
@@ -83,15 +82,8 @@ class RemoteUserLoginHandler(BaseHandler):
         else:
             user_data = extract_headers(self.request, self.authenticator.auth_headers)
             if 'Remote-User' not in user_data:
-                raise web.HTTPError(401, "You are not authenticated to do this")
-
-            # Login
-            name = ''.join(e for e in user_data['Remote-User'] if e.isalnum()).lower()
-            user_data['Remote-User'] = safeinput_encode(user_data['Remote-User']).lower()
-            user = self.user_from_username(user_data['Remote-User'])
-            user.name = name
-            self.set_login_cookie(user)
-            self.log.info("User: {}-{} - Login".format(user, user.name))
+                raise web.HTTPError(401, "You are not Authenticated to do this")
+            yield self.login_user(user_data)
 
             argument = self.get_argument("next", None, True)
             if argument is not None:
@@ -204,5 +196,17 @@ class MountRemoteUserAuthenticator(RemoteUserAuthenticator):
         ]
 
     @gen.coroutine
-    def authenticate(self, *args):
-        raise NotImplementedError()
+    def authenticate(self, hander, data):
+        if 'Remote-User' not in data:
+            self.log.info("A Remote-User header is required")
+            return None
+
+        # Login
+        name = safeinput_encode(data['Remote-User']).lower()
+        user = {
+            'name': name
+        }
+        self.log.info("Authenticated: {} - Login".format(user))
+        return user
+
+

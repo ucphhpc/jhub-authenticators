@@ -116,9 +116,9 @@ def test_auth_mount(image, container):
                                 headers=cert_auth_header)
     assert auth_response.status_code == 200
 
-    # auth_response = session.post("http://127.0.0.1:8000/hub/login",
-    #                              headers=cert_auth_header)
-    # assert auth_response.status_code == 200
+    auth_response = session.post(''.join([jhub_base_url, '/login']),
+                                 headers=cert_auth_header)
+    assert auth_response.status_code == 200
 
     wrong_header = {
         'Mount': "SDfssdfsesdfsfdsdfsxv"

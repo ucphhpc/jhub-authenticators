@@ -202,9 +202,11 @@ class MountRemoteUserAuthenticator(RemoteUserAuthenticator):
             return None
 
         # Login
-        name = safeinput_encode(data['Remote-User']).lower()
+        real_name = data['Remote-User'].lower()
+        encoded_name = safeinput_encode(data['Remote-User']).lower()
         user = {
-            'name': name
+            'name': encoded_name,
+            'real_name': real_name
         }
         self.log.info("Authenticated: {} - Login".format(user))
         return user

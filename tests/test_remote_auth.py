@@ -2,6 +2,7 @@ import requests
 import docker
 import pytest
 import time
+from random import SystemRandom
 from os.path import join, dirname, realpath
 from docker.types import Mount
 
@@ -20,12 +21,15 @@ config_path = join(dirname(realpath(__file__)), 'configs',
 jhub_image = {'path': docker_path, 'tag': IMAGE,
               'rm': 'True', 'pull': 'True'}
 
+rand_key = ''.join(SystemRandom().choice("0123456789abcdef") for _ in range(32))
+
 # container cmd
 jhub_cont = {'image': IMAGE, 'name': IMAGE_NAME,
              'mounts': [Mount(source=config_path,
                               target='/etc/jupyterhub/jupyterhub_config.py',
                               read_only=True,
                               type='bind')],
+             'environment': {'JUPYTERHUB_CRYPT_KEY': rand_key},
              'ports': {8000: 8000},
              'detach': 'True'}
 

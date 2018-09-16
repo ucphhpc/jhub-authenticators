@@ -29,7 +29,7 @@ Configuration
 You should edit your `jupyterhub_config.py` config file to set the
 authenticator class::
 
-    c.JupyterHub.authenticator_class = 'jhub-authenticators.RemoteUserAuthenticator'
+    c.JupyterHub.authenticator_class = 'jhubauthenticators.RemoteUserAuthenticator'
 
 You should be able to start jupyterhub.  The "/login" resource
 will look for the authenticated user name in the HTTP header "Remote-User".
@@ -37,7 +37,7 @@ If found, and not blank, you will be logged in as that user.
 
 Alternatively, you can use `RemoteUserLocalAuthenticator`::
 
-    c.JupyterHub.authenticator_class = 'jhub-authenticators.RemoteUserLocalAuthenticator'
+    c.JupyterHub.authenticator_class = 'jhubauthenticators.RemoteUserLocalAuthenticator'
 
 This provides the same authentication functionality but is derived from
 `LocalAuthenticator` and therefore provides features such as the ability
@@ -60,10 +60,20 @@ Note! Don't use in production.
 Remote User Authentication extended with Mount capability
 -------------------------------------------------------------
 
-Provides the capability to supply the jupyterhub user with a set of ssh keys that can later be used to mount that particular user's homedrive, the extended authenticator can be activated by setting the following option in the jupyterhub config file::
+Provides the capability to supply the jupyterhub user with additional state information
+via the /mount path, it accepts a stringified dictionary with a mount key that can
+later be used to mount that particular user's homedrive, the extended authenticator
+can be activated by setting the following option in the jupyterhub config file::
 
-    c.JupyterHub.authenticator_class = 'jhub-authenticators.MountRemoteUserAuthenticator'
-    
+    c.JupyterHub.authenticator_class = 'jhubauthenticators.MountRemoteUserAuthenticator'
+
+Beyond providing the Mount header possibility, the authenticator also by default
+encodes the Remote-User header with 'b32encode'. The authenticator therefore also provides
+the possibility of storing the actual value for debugging purposes in the user.real_name
+variable via the jupyterhub auth_state mechanism of passing information to
+the spawner as noted on `Authenticators <https://jupyterhub.readthedocs
+.io/en/stable/reference/authenticators.html>`_.
+
 This adds two base request paths to the jupyterhub web application::
 
 '/login' -> requires a non empty Remote-User header

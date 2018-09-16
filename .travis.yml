@@ -3,7 +3,7 @@ services: docker
 language: python
 python: '3.6'
 install:
-- docker pull jupyterhub/jupyterhub:0.9.1
+- docker pull jupyterhub/jupyterhub:0.9.2
 - pip install -r tests/requirements.txt
 script:
 - python setup.py check -rms

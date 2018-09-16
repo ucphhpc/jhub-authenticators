@@ -1,14 +1,13 @@
 .. image:: https://travis-ci.org/rasmunk/jhub-authenticators.svg?branch=master
     :target: https://travis-ci.org/rasmunk/jhub-authenticators
 
-====================================
-Jupyterhub Remote-User Authenticator
-====================================
+=========================
+Jupyterhub Authenticators
+=========================
 
-Authenticate to Jupyterhub using an authenticating proxy that can set
-the Remote-User header.
-Also supports for passing additional information to the jupyter user. This includes a
-Mount header.
+A bundle of Jupyterhub Authenticators.
+For now includes a Remote-User auth, Dummy auth and support for passing additional
+information to the jupyter user. This includes a Mount header.
 
 ------------
 Installation
@@ -43,6 +42,19 @@ Alternatively, you can use `RemoteUserLocalAuthenticator`::
 This provides the same authentication functionality but is derived from
 `LocalAuthenticator` and therefore provides features such as the ability
 to add local accounts through the admin interface if configured to do so.
+
+--------------------
+Dummy Authentication
+--------------------
+
+Provides an option for testing JupyterHub authentication with a dummy authenticator
+that can have a global preset password for any account::
+
+    c.JupyterHub.authenticator_class = 'jhubauthenticators.DummyAuthenticator'
+    c.DummyAuthenticator.password = 'password'
+
+
+Note! Don't use in production.
 
 -------------------------------------------------------------
 Remote User Authentication extended with Mount capability

@@ -1,3 +1,5 @@
+import re
+import string
 from base64 import b32encode, b32decode
 from jupyterhub.handlers import BaseHandler
 from jupyterhub.auth import Authenticator
@@ -222,6 +224,8 @@ class MountRemoteUserAuthenticator(RemoteUserAuthenticator):
             return
 
         if isinstance(auth_state, dict) and 'real_name' in auth_state:
-            user.real_name = auth_state['real_name']
+            # Make it alphanumeric
+            pattern = re.compile('[\W_]+', re.UNICODE)
+            user.real_name = pattern.sub('', auth_state['real_name'])
             self.log.info("Pre-Spawn: {} set user real_name {}"
                           .format(user, user.real_name))

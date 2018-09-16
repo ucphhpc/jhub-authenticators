@@ -1,5 +1,4 @@
 import re
-import string
 from base64 import b32encode, b32decode
 from jupyterhub.handlers import BaseHandler
 from jupyterhub.auth import Authenticator

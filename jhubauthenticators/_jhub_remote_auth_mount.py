@@ -212,3 +212,16 @@ class MountRemoteUserAuthenticator(RemoteUserAuthenticator):
         }
         self.log.info("Authenticated: {} - Login".format(user))
         return user
+
+    @gen.coroutine
+    def pre_spawn_start(self, user, spawner):
+        """Pass upstream_token to spawner via environment variable"""
+        auth_state = yield user.get_auth_state()
+        if not auth_state:
+            # auth_state not enabled
+            return
+
+        if isinstance(auth_state, dict) and hasattr(auth_state, 'real_name'):
+            user.real_name = auth_state['real_name']
+            self.log.info("Pre-Spawn: {} set user real_name {}"
+                          .format(user, user.real_name))

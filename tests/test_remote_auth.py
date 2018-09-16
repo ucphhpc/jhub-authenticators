@@ -85,6 +85,45 @@ def tests_auth_hub(image, container):
 
 @pytest.mark.parametrize('image', [jhub_image], indirect=['image'])
 @pytest.mark.parametrize('container', [jhub_cont], indirect=['container'])
+def test_pre_spawn(image, container):
+    """
+    :param image:
+    :param container:
+    :return:
+    """
+    # not ideal, wait for the jhub container to start, update with proper check
+    time.sleep(5)
+    client = docker.from_env()
+    containers = client.containers.list()
+    assert len(containers) > 0
+    session = requests.session()
+
+    jhub_base_url = 'http://127.0.0.1:8000/hub'
+    # wait for jhub to be ready
+    jhub_ready = False
+    while not jhub_ready:
+        resp = session.get(''.join([jhub_base_url, '/home']))
+        if resp.status_code != 404:
+            jhub_ready = True
+
+    # Auth requests
+    user_cert = '/C=DK/ST=NA/L=NA/O=NBI/OU=NA/CN=Name' \
+                '/emailAddress=mail@sdfsf.com'
+    other_user = 'idfsf'
+
+    cert_auth_header = {
+        'Remote-User': user_cert
+    }
+
+    auth_response = session.post(''.join([jhub_base_url, '/login']),
+                                 headers=cert_auth_header)
+    assert auth_response.status_code == 200
+    
+
+
+
+@pytest.mark.parametrize('image', [jhub_image], indirect=['image'])
+@pytest.mark.parametrize('container', [jhub_cont], indirect=['container'])
 def test_auth_mount(image, container):
     """
     Test that the client is able to.

@@ -221,7 +221,7 @@ class MountRemoteUserAuthenticator(RemoteUserAuthenticator):
             # auth_state not enabled
             return
 
-        if isinstance(auth_state, dict) and hasattr(auth_state, 'real_name'):
+        if isinstance(auth_state, dict) and 'real_name' in auth_state:
             user.real_name = auth_state['real_name']
             self.log.info("Pre-Spawn: {} set user real_name {}"
                           .format(user, user.real_name))

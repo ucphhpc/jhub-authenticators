@@ -31,9 +31,9 @@ jhub_cont = {'image': IMAGE, 'name': IMAGE_NAME,
              'detach': 'True'}
 
 
-@pytest.mark.parametrize('image', [jhub_image], indirect=['image'])
+@pytest.mark.parametrize('build_image', [jhub_image], indirect=['build_image'])
 @pytest.mark.parametrize('container', [jhub_cont], indirect=['container'])
-def test_dummy_auth(image, container):
+def test_dummy_auth(build_image, container):
     """
     Test that the client is able to.
     - Once authenticated, pass a correctly formatted Mount Header

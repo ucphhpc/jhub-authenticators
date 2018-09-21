@@ -106,7 +106,7 @@ def test_auth_mount(build_image, container):
         if resp.status_code != 404:
             jhub_ready = True
 
-    no_auth_mount = session.post(''.join([jhub_base_url, '/mount']))
+    no_auth_mount = session.post(''.join([jhub_base_url, '/data']))
     assert no_auth_mount.status_code == 403
 
     # Auth requests
@@ -167,11 +167,11 @@ def test_auth_mount(build_image, container):
     }
 
     # Invalid mount header
-    auth_mount_response = session.post(''.join([jhub_base_url, '/mount']),
+    auth_mount_response = session.post(''.join([jhub_base_url, '/data']),
                                        headers=wrong_header)
     assert auth_mount_response.status_code == 403
 
     # Valid mount header
-    auth_mount_response = session.post(''.join([jhub_base_url, '/mount']),
+    auth_mount_response = session.post(''.join([jhub_base_url, '/data']),
                                        headers=correct_header)
     assert auth_mount_response.status_code == 200

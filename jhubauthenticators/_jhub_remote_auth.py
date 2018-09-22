@@ -95,9 +95,10 @@ class RemoteUserLoginHandler(BaseHandler):
 
 class DataHandler(BaseHandler):
     """
-    If the request is properly authenticated, check for Mount HTTP header,
-    Excepts a string structure that can be interpreted by python
-    The data is set to the user's mount attribute
+    If the request is properly authenticated, check for a valid HTTP header,
+    Excepts a string structure that can be interpreted by the ast module.
+    If valid the passed information is appended to the authenticated user's state data
+    dictionary where the header name is used as the key value.
     """
 
     @web.authenticated

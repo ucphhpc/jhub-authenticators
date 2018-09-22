@@ -86,10 +86,10 @@ def tests_auth_hub(build_image, container):
 
 @pytest.mark.parametrize('build_image', [jhub_image], indirect=['build_image'])
 @pytest.mark.parametrize('container', [jhub_cont], indirect=['container'])
-def test_auth_mount(build_image, container):
+def test_auth_data_header(build_image, container):
     """
     Test that the client is able to.
-    Once authenticated, pass a correctly formatted Mount Header
+    Once authenticated, pass a correctly formatted custom Data header
     """
     # not ideal, wait for the jhub container to start, update with proper check
     time.sleep(5)

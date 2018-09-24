@@ -86,10 +86,10 @@ def tests_auth_hub(build_image, container):
 
 @pytest.mark.parametrize('build_image', [jhub_image], indirect=['build_image'])
 @pytest.mark.parametrize('container', [jhub_cont], indirect=['container'])
-def test_auth_mount(build_image, container):
+def test_auth_data_header(build_image, container):
     """
     Test that the client is able to.
-    Once authenticated, pass a correctly formatted Mount Header
+    Once authenticated, pass a correctly formatted custom Data header
     """
     # not ideal, wait for the jhub container to start, update with proper check
     time.sleep(5)
@@ -106,7 +106,7 @@ def test_auth_mount(build_image, container):
         if resp.status_code != 404:
             jhub_ready = True
 
-    no_auth_mount = session.post(''.join([jhub_base_url, '/mount']))
+    no_auth_mount = session.post(''.join([jhub_base_url, '/data']))
     assert no_auth_mount.status_code == 403
 
     # Auth requests
@@ -167,11 +167,11 @@ def test_auth_mount(build_image, container):
     }
 
     # Invalid mount header
-    auth_mount_response = session.post(''.join([jhub_base_url, '/mount']),
+    auth_mount_response = session.post(''.join([jhub_base_url, '/data']),
                                        headers=wrong_header)
     assert auth_mount_response.status_code == 403
 
     # Valid mount header
-    auth_mount_response = session.post(''.join([jhub_base_url, '/mount']),
+    auth_mount_response = session.post(''.join([jhub_base_url, '/data']),
                                        headers=correct_header)
     assert auth_mount_response.status_code == 200

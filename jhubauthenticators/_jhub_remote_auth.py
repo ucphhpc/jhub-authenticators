@@ -28,7 +28,7 @@ def safeinput_decode(input_str):
     # https://tools.ietf.org/html/rfc3548 :
     # (1) the final quantum of encoding input is an integral multiple of 40
     # bits; here, the final unit of encoded output will be an integral
-    # multiple of 8 characters with no "=" padding,
+    # multiple of 8 characters with no "=" padding.
     if len(input_str) % 8 != 0:
         padlen = 8 - (len(input_str) % 8)
         padding = "".join('=' for i in range(padlen))
@@ -93,38 +93,41 @@ class RemoteUserLoginHandler(BaseHandler):
                 self.redirect(url_path_join(self.hub.server.base_url, 'home'))
 
 
-class MountHandler(BaseHandler):
+class DataHandler(BaseHandler):
     """
-    If the request is properly authenticated, check for Mount HTTP header,
-    Excepts a string structure that can be interpreted by python
-    The data is set to the user's mount attribute
+    If the request is properly authenticated, check for a valid HTTP header,
+    Excepts a string structure that can be interpreted by the ast module.
+    If valid the passed information is appended to the authenticated user's state data
+    dictionary where the header name is used as the key value.
     """
 
     @web.authenticated
     @gen.coroutine
     def post(self):
-        mount_data = extract_headers(self.request, self.authenticator.mount_headers)
-        if 'Mount' not in mount_data:
-            raise web.HTTPError(403, "The request must contain a Mount "
-                                     "header")
-        else:
-            user = self.get_current_user()
+        user_data = extract_headers(self.request,
+                                    self.authenticator.data_headers)
+        if not user_data:
+            raise web.HTTPError(403, "No valid data header was received")
+
+        user = self.get_current_user()
+        for k, d in user_data.items():
+            # Try to parse the passed information into a valid dtype
             try:
-                mount_header_dict = literal_eval(mount_data['Mount'])
+                evaled_data = literal_eval(d)
             except ValueError as err:
-                msg = "passed invalid Mount header format"
-                self.log.error("User: {}-{} - {}-{}".format(user, user.name, msg, err))
-                raise web.HTTPError(403, "{}".format(msg))
+                msg = "Failed to interpret the data header"
+                self.log.error("User: {} - {}-{}-{}".format(
+                    user, d, msg, err))
+                raise web.HTTPError(403, msg)
 
-            if type(mount_header_dict) is not dict:
-                msg = "Mount header must be a dictionary"
-                self.log.error("User: {}-{} - {}".format(user, user.name, msg))
-                raise web.HTTPError(403, "{}".format(msg))
+            self.log.info("User: {}-{} Accepted data header: {}".format(
+                user, user.name, evaled_data
+            ))
 
-            self.log.info("User: {}-{} - Accepted mount header: {}"
-                          .format(user, user.name, mount_header_dict))
-            self.get_current_user().mount = mount_header_dict
-            self.redirect(url_path_join(self.hub.server.base_url, 'home'))
+            if not hasattr(user, 'data'):
+                user.data = {}
+            user.data[k] = evaled_data
+        self.redirect(url_path_join(self.hub.server.base_url, 'home'))
 
 
 class RemoteUserAuthenticator(Authenticator):
@@ -169,11 +172,9 @@ class RemoteUserLocalAuthenticator(LocalAuthenticator):
         raise NotImplementedError()
 
 
-class MountRemoteUserAuthenticator(RemoteUserAuthenticator):
+class DataRemoteUserAuthenticator(RemoteUserAuthenticator):
     """
-    Accept the authenticated user name from the Remote-User HTTP header.
-    In addition to this it also allows Mount to pass user mount data that allows
-    the jhub to mount an external storage
+    An Authenticator that supports dynamic header information
     """
 
     auth_headers = List(
@@ -182,10 +183,10 @@ class MountRemoteUserAuthenticator(RemoteUserAuthenticator):
         help="""List of allowed HTTP headers to get from user data"""
     )
 
-    mount_headers = List(
-        default_value=['Mount'],
+    data_headers = List(
+        default_value=[],
         config=True,
-        help="""List of allowed mount headers"""
+        help="""List of allowed data headers"""
     )
 
     # These paths are an extension of the prefix base url e.g. /dag/hub
@@ -193,7 +194,7 @@ class MountRemoteUserAuthenticator(RemoteUserAuthenticator):
         return [
             (r'/login', RemoteUserLoginHandler),
             (r'/logout', RemoteUserLogoutHandler),
-            (r'/mount', MountHandler),
+            (r'/data', DataHandler),
         ]
 
     @gen.coroutine
@@ -226,5 +227,5 @@ class MountRemoteUserAuthenticator(RemoteUserAuthenticator):
             # Make it alphanumeric
             pattern = re.compile('[\W_]+', re.UNICODE)
             user.real_name = pattern.sub('', auth_state['real_name'])
-            self.log.info("Pre-Spawn: {} set user real_name {}"
-                          .format(user, user.real_name))
+            self.log.debug("Pre-Spawn: {} set user real_name {}".format(
+                user, user.real_name))

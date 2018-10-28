@@ -226,3 +226,8 @@ class DataRemoteUserAuthenticator(RemoteUserAuthenticator):
         if not auth_state:
             # auth_state not enabled
             return
+
+        if isinstance(auth_state, dict) and 'real_name' in auth_state:
+            user.real_name = auth_state['real_name']
+            self.log.debug("Pre-Spawn: {} set user real_name {}".format(
+                user, user.real_name))

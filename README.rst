@@ -1,4 +1,4 @@
-.. image:: https://travis-ci.org/rasmunk/jhub-authenticators.svg?branch=devel
+.. image:: https://travis-ci.org/rasmunk/jhub-authenticators.svg?branch=master
     :target: https://travis-ci.org/rasmunk/jhub-authenticators
 
 =========================

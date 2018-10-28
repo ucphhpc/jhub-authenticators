@@ -198,14 +198,18 @@ class DataRemoteUserAuthenticator(RemoteUserAuthenticator):
         ]
 
     @gen.coroutine
-    def authenticate(self, hander, data):
+    def authenticate(self, handler, data):
         if 'Remote-User' not in data:
             self.log.info("A Remote-User header is required")
             return None
 
         # Login
         real_name = data['Remote-User'].lower()
-        encoded_name = safeinput_encode(data['Remote-User']).lower()
+        # Make it alphanumeric
+        pattern = re.compile('[\W_]+', re.UNICODE)
+        real_name = pattern.sub('', real_name)
+        encoded_name = safeinput_encode(real_name)
+
         user = {
             'name': encoded_name,
             'auth_state': {
@@ -222,10 +226,3 @@ class DataRemoteUserAuthenticator(RemoteUserAuthenticator):
         if not auth_state:
             # auth_state not enabled
             return
-
-        if isinstance(auth_state, dict) and 'real_name' in auth_state:
-            # Make it alphanumeric
-            pattern = re.compile('[\W_]+', re.UNICODE)
-            user.real_name = pattern.sub('', auth_state['real_name'])
-            self.log.debug("Pre-Spawn: {} set user real_name {}".format(
-                user, user.real_name))

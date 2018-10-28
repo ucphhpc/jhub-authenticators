@@ -174,7 +174,7 @@ class RemoteUserLocalAuthenticator(LocalAuthenticator):
 
 class DataRemoteUserAuthenticator(RemoteUserAuthenticator):
     """
-    An Authenticator that supports dynamic header information
+    An Authenticator that supports dynamic headerF information
     """
 
     auth_headers = List(

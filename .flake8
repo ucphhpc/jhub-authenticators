@@ -1,3 +1,3 @@
 [flake8]
 max-line-length = 89
-exclude = build,tests/configs,jhubauthenticators/__init__.py
+exclude = build,tests/jupyterhub_configs,jhubauthenticators/__init__.py,venv

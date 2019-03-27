@@ -14,8 +14,8 @@ JHUB_URL = "http://127.0.0.1:8000"
 docker_path = dirname(dirname(realpath(__file__)))
 
 # mount paths
-config_path = join(dirname(realpath(__file__)), 'configs',
-                   'dummy_auth_jupyterhub_config.py')
+config_path = join(dirname(realpath(__file__)), 'jupyterhub_configs',
+                   'dummy_auth_config.py')
 
 # image build
 jhub_image = {'path': docker_path, 'tag': IMAGE,

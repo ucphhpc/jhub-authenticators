@@ -108,15 +108,16 @@ class DataHandler(BaseHandler):
         if not user_data:
             raise web.HTTPError(403, "No valid data header was received")
 
+        self.log.debug("Prepared user_data dict: {}".format(user_data))
         user = self.get_current_user()
-        for k, d in enumerate(user_data):
+        for k, d in user_data.items():
             # Try to parse the passed information into a valid dtype
             try:
                 evaled_data = literal_eval(d)
             except ValueError as err:
                 msg = "Failed to interpret the data header"
-                self.log.error("User: {}-{} - {}-{}".format(
-                    user, user.name, msg, err))
+                self.log.error("User: {}-{} - {}-{} - {}-{}".format(
+                    user, user.name, msg, err, k, d))
                 raise web.HTTPError(403, msg)
 
             self.log.info("User: {}-{} Accepted data header: {}".format(
@@ -125,7 +126,7 @@ class DataHandler(BaseHandler):
 
             if not hasattr(user, 'data'):
                 user.data = {}
-            user['data'][k] = evaled_data
+            user.data[k] = evaled_data
         self.redirect(url_path_join(self.hub.server.base_url, 'home'))
 
 
@@ -158,7 +159,8 @@ class RemoteUserLocalAuthenticator(LocalAuthenticator):
     header_name = Unicode(
         default_value='Remote-User',
         config=True,
-        help="""HTTP header to inspect for the authenticated username.""")
+        help="""HTTP header to inspect for the authenticated username."""
+    )
 
     def get_handlers(self, app):
         return [
@@ -183,7 +185,7 @@ class DataRemoteUserAuthenticator(RemoteUserAuthenticator):
     )
 
     data_headers = List(
-        None,
+        default_value=[],
         config=True,
         help="""List of allowed data headers"""
     )
@@ -227,4 +229,5 @@ class DataRemoteUserAuthenticator(RemoteUserAuthenticator):
             pattern = re.compile('[\W_]+', re.UNICODE)
             user.real_name = pattern.sub('', auth_state['real_name'])
             self.log.info("Pre-Spawn: {} set user real_name {}"
-                          .format(user, user.real_name))
+                          .format(user, user.real_name)
+                          )

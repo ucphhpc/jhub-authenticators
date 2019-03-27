@@ -14,10 +14,8 @@ IMAGE = "".join([IMAGE_NAME, ":", IMAGE_TAG])
 docker_path = dirname(dirname(realpath(__file__)))
 
 # mount paths
-remote_config_path = join(dirname(realpath(__file__)), 'configs',
-                          'remote_auth_jupyterhub_config.py')
-docker_config_path = join(dirname(realpath(__file__)), 'configs',
-                          'auth_docker_spawn_jupyterhub_config.py')
+remote_config_path = join(dirname(realpath(__file__)), 'jupyterhub_configs',
+                          'remote_auth_config.py')
 
 # image build
 jhub_image = {'path': docker_path, 'tag': IMAGE,
@@ -25,10 +23,11 @@ jhub_image = {'path': docker_path, 'tag': IMAGE,
 
 rand_key = ''.join(SystemRandom().choice("0123456789abcdef") for _ in range(32))
 
+target_config = '/etc/jupyterhub/jupyterhub_config.py'
 # container cmd
 jhub_cont = {'image': IMAGE, 'name': IMAGE_NAME,
              'mounts': [Mount(source=remote_config_path,
-                              target='/etc/jupyterhub/jupyterhub_config.py',
+                              target=target_config,
                               read_only=True,
                               type='bind')],
              'ports': {8000: 8000},
@@ -37,7 +36,7 @@ jhub_cont = {'image': IMAGE, 'name': IMAGE_NAME,
 
 @pytest.mark.parametrize('build_image', [jhub_image], indirect=['build_image'])
 @pytest.mark.parametrize('container', [jhub_cont], indirect=['container'])
-def tests_auth_hub(build_image, container):
+def test_auth_hub(build_image, container):
     """
     Test that the client is able to,
     Not access the home path without being authed

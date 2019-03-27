@@ -109,6 +109,7 @@ class DataHandler(BaseHandler):
         if not user_data:
             raise web.HTTPError(403, "No valid data header was received")
 
+        self.log.debug("Prepared user_data dict: {}".format(user_data))
         user = self.get_current_user()
         for k, d in user_data.items():
             # Try to parse the passed information into a valid dtype
@@ -159,7 +160,8 @@ class RemoteUserLocalAuthenticator(LocalAuthenticator):
     header_name = Unicode(
         default_value='Remote-User',
         config=True,
-        help="""HTTP header to inspect for the authenticated username.""")
+        help="""HTTP header to inspect for the authenticated username."""
+    )
 
     def get_handlers(self, app):
         return [

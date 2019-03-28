@@ -95,6 +95,7 @@ class HeaderAuthenticator(Authenticator):
         """Pass upstream_token to spawner via environment variable"""
         auth_state = yield user.get_auth_state()
         if not auth_state:
+            self.log.debug("HeaderAuthenticator - pre_spawn_hook, auth_state: {}".format(auth_state))
             # auth_state not enabled
             return None
 

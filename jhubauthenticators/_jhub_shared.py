@@ -115,3 +115,21 @@ class JSONParser(Parser):
 
         json_obj = json.loads(data)
         return json_obj
+
+
+class StringParser(Parser):
+
+    def parse(self, data):
+        if not data:
+            self.log.error("StringParser - Didn't "
+                           "receive any input missing data: {}".format(data))
+            return None
+        self.log.debug("StringParser - Data: {}, type: {}".format(data, type(data)))
+        try:
+            str_obj = str(data)
+        except TypeError as err:
+            self.log.error("StringParser - Failed to cast data: {} to str, err: {}".format(
+                data, err
+            ))
+            return None
+        return str_obj

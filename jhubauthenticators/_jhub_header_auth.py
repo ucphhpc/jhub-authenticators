@@ -83,7 +83,7 @@ class HeaderAuthenticator(Authenticator):
         user = {
             'name': user_data.pop(self.allowed_headers['auth'], None)
         }
-        # Something left in user_data
+        # Something left in user_data, put in auth_state
         if user_data:
             user.update({'auth_state': user_data})
 
@@ -102,11 +102,14 @@ class HeaderAuthenticator(Authenticator):
         self.log.debug("HeaderAuthenticator - pre_spawn_hook, "
                        "loaded auth_state {}".format(auth_state))
         # Share permitted headers
-        if not self.shared_header:
+        if not self.spawner_shared_headers:
             self.log.debug("HeaderAuthenticator - no headers were "
-                           "shared with spawner environment: {}".format(self.shared_header))
+                           "shared with spawner environment: {}".format(self.spawner_shared_headers))
             return None
 
         for auth_key, auth_val in auth_state.items():
-            if auth_key in self.shared_header:
-                spawner.environment[auth_key] = auth_val
+            if auth_key in self.spawner_shared_headers:
+                spawner.environment[auth_key.upper()] = auth_val
+        self.log.debug("HeaderAuthenticator - shared auth_state headers: {} with "
+                       "spawner environment: {}".format(self.spawner_shared_headers,
+                                                        spawner.environment))

@@ -1,8 +1,10 @@
+import os
 import requests
 import docker
 import pytest
 import time
 import json
+import base64
 from os.path import join, dirname, realpath
 from docker.types import Mount
 
@@ -21,6 +23,8 @@ email_username_config = join(configs_dir_path,
                              'header_email_username_config.py')
 custom_data_header_config = join(configs_dir_path,
                                  'header_custom_header_config.py')
+auth_state_header_config = join(configs_dir_path,
+                                'header_auth_state_header_config.py')
 
 # image build
 jhub_image = {'path': docker_path, 'tag': IMAGE,
@@ -49,6 +53,26 @@ custom_data_header_jhub_cont = {'image': IMAGE, 'name': IMAGE_NAME,
                                                  type='bind')],
                                 'ports': {8000: 8000},
                                 'detach': 'True'}
+
+AUTH_STATE_NETWORK_NAME = 'jhub_auth_state_network'
+auth_state_network_config = {'name': AUTH_STATE_NETWORK_NAME,
+                             'driver': 'bridge',
+                             'attachable': True}
+auth_state_data_header_jhub_cont = {'image': IMAGE, 'name': IMAGE_NAME,
+                                    'mounts': [Mount(source=auth_state_header_config,
+                                                     target=target_config,
+                                                     read_only=True,
+                                                     type='bind'),
+                                               Mount(source='/var/run/docker.sock',
+                                                     target='/var/run/docker.sock',
+                                                     read_only=True,
+                                                     type='bind')],
+                                    'ports': {8000: 8000},
+                                    'detach': 'True',
+                                    'environment': {'JUPYTERHUB_CRYPT_KEY':
+                                                    base64.b64encode(os.urandom(32))},
+                                    'network': AUTH_STATE_NETWORK_NAME,
+                                    'command': 'jupyterhub --debug -f ' + target_config}
 
 
 @pytest.mark.parametrize('build_image', [jhub_image], indirect=['build_image'])
@@ -122,6 +146,49 @@ def test_custom_data_header_auth(build_image, container):
         auth_response = session.post(''.join([jhub_base_url, '/login']),
                                      headers=auth_data_header)
         assert auth_response.status_code == 200
+
+
+@pytest.mark.parametrize('build_image', [jhub_image], indirect=['build_image'])
+@pytest.mark.parametrize('network', [auth_state_network_config], indirect=['network'])
+@pytest.mark.parametrize('container', [auth_state_data_header_jhub_cont],
+                         indirect=['container'])
+def test_auth_state_header_auth(build_image, network, container):
+    """
+    Test that the client is able to. Test that auth_state recieves 
+    the specified test data headers.
+    """
+    # not ideal, wait for the jhub container to start, update with proper check
+    time.sleep(5)
+    client = docker.from_env()
+    containers = client.containers.list()
+    assert len(containers) > 0
+    with requests.session() as session:
+        jhub_base_url = 'http://127.0.0.1:8000/hub'
+        # wait for jhub to be ready
+        jhub_ready = False
+        while not jhub_ready:
+            resp = session.get(''.join([jhub_base_url, '/home']))
+            if resp.status_code != 404:
+                jhub_ready = True
+
+        # Auth requests
+        remote_user = 'myusername'
+        data_str = 'blablabla'
+        data_int = 1231231
+        data_dict = {'HOST': 'hostaddr',
+                     'USERNAME': 'randomstring_unique_string',
+                     'PATH': '@host.localhost:'}
+        auth_data_header = {
+            'Remote-User': remote_user,
+            'StringData': data_str
+        }
+
+        auth_response = session.post(''.join([jhub_base_url, '/login']),
+                                     headers=auth_data_header)
+        assert auth_response.status_code == 200
+        # Spawn with auth_state
+        spawn_response = session.post(''.join([jhub_base_url, '/spawn']))
+        assert spawn_response.status_code == 200
 
 
 @pytest.mark.parametrize('build_image', [jhub_image], indirect=['build_image'])

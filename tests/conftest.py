@@ -5,6 +5,23 @@ from docker.errors import NotFound
 
 
 @pytest.fixture(scope='function')
+def network(request):
+    """Create the docker network that the hub and server services will
+    use to communicate.
+    """
+    client = docker.from_env()
+    _network = client.networks.create(**request.param)
+    yield _network
+    _network.remove()
+    removed = False
+    while not removed:
+        try:
+            client.networks.get(_network.id)
+        except NotFound:
+            removed = True
+
+
+@pytest.fixture(scope='function')
 def build_image(request):
     client = docker.from_env()
     _image = client.images.build(**request.param)

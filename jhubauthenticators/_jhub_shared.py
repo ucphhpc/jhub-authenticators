@@ -105,9 +105,7 @@ class JSONParser(Parser):
             self.log.error("JSONParser - Didn't "
                            "receive any input missing data: {}".format(data))
             return None
-        self.log.info("JSONParser - Data: {}, type: {}".format(
-            data, type(data)
-        ))
+        self.log.debug("JSONParser - Data: {}, type: {}".format(data, type(data)))
         if not isinstance(data, JSONParser.json_types):
             self.log.error("JSONParser - data: {} is of an incorrect type: {} "
                            "must be one of type: {}".format(

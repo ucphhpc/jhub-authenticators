@@ -96,9 +96,16 @@ class HeaderAuthenticator(Authenticator):
         auth_state = yield user.get_auth_state()
         if not auth_state:
             # auth_state not enabled
-            return
+            return None
 
+        self.log.debug("HeaderAuthenticator - pre_spawn_hook, "
+                       "loaded auth_state {}".format(auth_state))
         # Share permitted headers
+        if not self.shared_header:
+            self.log.debug("HeaderAuthenticator - no headers were "
+                           "shared with spawner environment: {}".format(self.shared_header))
+            return None
+
         for auth_key, auth_val in auth_state.items():
             if auth_key in self.shared_header:
                 spawner.environment[auth_key] = auth_val

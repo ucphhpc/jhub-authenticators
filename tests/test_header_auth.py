@@ -71,9 +71,7 @@ auth_state_data_header_jhub_cont = {'image': IMAGE, 'name': IMAGE_NAME,
                                     'detach': 'True',
                                     'environment': {'JUPYTERHUB_CRYPT_KEY':
                                                     base64.b64encode(os.urandom(32))},
-                                    'network': AUTH_STATE_NETWORK_NAME,
-                                    'command': 'jupyterhub --debug '
-                                    '-f /etc/jupyterhub/jupyterhub_config.py'}
+                                    'network': AUTH_STATE_NETWORK_NAME}
 
 
 @pytest.mark.parametrize('build_image', [jhub_image], indirect=['build_image'])
@@ -195,6 +193,7 @@ def test_auth_state_header_auth(build_image, network, container):
         # Spawn with auth_state
         spawn_response = session.post(''.join([jhub_base_url, '/spawn']))
         assert spawn_response.status_code == 200
+        time.sleep(5)
         post_spawn_containers = client.containers.list()
 
         jupyter_containers = [container for container in post_spawn_containers

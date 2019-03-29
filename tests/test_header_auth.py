@@ -72,7 +72,8 @@ auth_state_data_header_jhub_cont = {'image': IMAGE, 'name': IMAGE_NAME,
                                     'environment': {'JUPYTERHUB_CRYPT_KEY':
                                                     base64.b64encode(os.urandom(32))},
                                     'network': AUTH_STATE_NETWORK_NAME,
-                                    'command': 'jupyterhub --debug -f ' + target_config}
+                                    'command': 'jupyterhub --debug '
+                                    '-f /etc/jupyterhub/jupyterhub_config.py'}
 
 
 @pytest.mark.parametrize('build_image', [jhub_image], indirect=['build_image'])
@@ -154,7 +155,7 @@ def test_custom_data_header_auth(build_image, container):
                          indirect=['container'])
 def test_auth_state_header_auth(build_image, network, container):
     """
-    Test that the client is able to. Test that auth_state recieves 
+    Test that the client is able to. Test that auth_state recieves
     the specified test data headers.
     """
     # not ideal, wait for the jhub container to start, update with proper check
@@ -173,22 +174,40 @@ def test_auth_state_header_auth(build_image, network, container):
 
         # Auth requests
         remote_user = 'myusername'
-        data_str = 'blablabla'
-        data_int = 1231231
+        data_str = "blablabla"
         data_dict = {'HOST': 'hostaddr',
                      'USERNAME': 'randomstring_unique_string',
                      'PATH': '@host.localhost:'}
+        env_data = {
+            'StringData': data_str,
+            'JsonData': data_dict
+        }
         auth_data_header = {
             'Remote-User': remote_user,
-            'StringData': data_str
         }
 
+        # Cast to json data types before submission
+        auth_data_header.update({env_key: json.dumps(env_val)
+                                 for env_key, env_val in env_data.items()})
         auth_response = session.post(''.join([jhub_base_url, '/login']),
                                      headers=auth_data_header)
         assert auth_response.status_code == 200
         # Spawn with auth_state
         spawn_response = session.post(''.join([jhub_base_url, '/spawn']))
         assert spawn_response.status_code == 200
+        post_spawn_containers = client.containers.list()
+
+        jupyter_containers = [container for container in post_spawn_containers
+                              if "jupyter-" in container.name]
+        assert len(jupyter_containers) > 0
+        # Check container for passed environments
+        for container in jupyter_containers:
+            envs = {env.split('=')[0]: env.split('=')[1]
+                    for env in container.attrs['Config']['Env']}
+            for data_key, data_value in env_data.items():
+                index_key = data_key.upper()
+                assert index_key in envs
+                assert envs[index_key] == str(data_value)
 
 
 @pytest.mark.parametrize('build_image', [jhub_image], indirect=['build_image'])

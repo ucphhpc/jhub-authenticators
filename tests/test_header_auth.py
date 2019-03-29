@@ -196,8 +196,8 @@ def test_auth_state_header_auth(build_image, network, container):
         time.sleep(5)
         post_spawn_containers = client.containers.list()
 
-        jupyter_containers = [container for container in post_spawn_containers
-                              if "jupyter-" in container.name]
+        jupyter_containers = [jup_container for jup_container in post_spawn_containers
+                              if "jupyter-" in jup_container.name]
         assert len(jupyter_containers) > 0
         # Check container for passed environments
         for container in jupyter_containers:

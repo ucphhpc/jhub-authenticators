@@ -98,7 +98,7 @@ class HeaderAuthenticator(Authenticator):
             self.log.debug("HeaderAuthenticator - pre_spawn_hook, "
                            "auth_state: {}".format(auth_state))
             # auth_state not enabled
-            return None
+            return
 
         self.log.debug("HeaderAuthenticator - pre_spawn_hook, "
                        "loaded auth_state {}".format(auth_state))
@@ -107,7 +107,7 @@ class HeaderAuthenticator(Authenticator):
             self.log.debug("HeaderAuthenticator - no headers were "
                            "shared with spawner environment: {}".format(
                                self.spawner_shared_headers))
-            return None
+            return
 
         for auth_key, auth_val in auth_state.items():
             if auth_key in self.spawner_shared_headers:

@@ -111,7 +111,7 @@ class HeaderAuthenticator(Authenticator):
 
         for auth_key, auth_val in auth_state.items():
             if auth_key in self.spawner_shared_headers:
-                spawner.environment[auth_key.upper()] = auth_val
+                spawner.environment[auth_key] = auth_val
         self.log.debug("HeaderAuthenticator - shared auth_state headers: {} with "
                        "spawner environment: {}".format(self.spawner_shared_headers,
                                                         spawner.environment))

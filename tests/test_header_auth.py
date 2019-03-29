@@ -204,9 +204,8 @@ def test_auth_state_header_auth(build_image, network, container):
             envs = {env.split('=')[0]: env.split('=')[1]
                     for env in container.attrs['Config']['Env']}
             for data_key, data_value in env_data.items():
-                index_key = data_key.upper()
-                assert index_key in envs
-                assert envs[index_key] == str(data_value)
+                assert data_key in envs
+                assert envs[data_key] == str(data_value)
 
 
 @pytest.mark.parametrize('build_image', [jhub_image], indirect=['build_image'])

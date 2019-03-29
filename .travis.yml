@@ -9,10 +9,8 @@ python:
 - '3.7'
 install:
 - docker pull jupyterhub/jupyterhub:0.9.2
+- docker pull jupyter/base-notebook:latest
 - pip install -r tests/requirements.txt
-
-before_script:
-  docker pull jupyter/base-notebook:latest
 script:
 - python setup.py check -rms
 - flake8

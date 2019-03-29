@@ -193,7 +193,7 @@ def test_auth_state_header_auth(build_image, network, container):
         # Spawn with auth_state
         spawn_response = session.post(''.join([jhub_base_url, '/spawn']))
         assert spawn_response.status_code == 200
-        time.sleep(5)
+        time.sleep(15)
         post_spawn_containers = client.containers.list()
 
         jupyter_containers = [jup_container for jup_container in post_spawn_containers

@@ -1,6 +1,8 @@
 import json
+from json import JSONDecodeError
 from re import search
 from tornado import gen, web
+from tornado.escape import json_decode
 from jupyterhub.handlers import BaseHandler
 from jupyterhub.utils import url_path_join
 from traitlets import CRegExp
@@ -16,11 +18,17 @@ class HeaderLoginHandler(BaseHandler):
     def prepare(self):
         """ Checks whether the user is authenticated, if so
          the user is redirected to / hub.server.base_url / home """
-        if self.get_current_user() is not None:
+        if self.get_current_user():
             self.log.info("User: {} is already authenticated"
                           .format(self.get_current_user(), self.get_current_user().name))
-            self.redirect(url_path_join(self.hub.server.base_url, 'home'))
+
+            argument = self.get_argument("next", None, True)
+            if argument:
+                self.redirect(argument)
+            else:
+                self.redirect(url_path_join(self.hub.server.base_url, 'home'))
         else:
+            # You need to authenticate first
             headers = self.request.headers
             # Authenticate user
             user = yield self.login_user(headers)
@@ -36,14 +44,59 @@ class HeaderLoginHandler(BaseHandler):
                 self.redirect(url_path_join(self.hub.server.base_url, 'home'))
 
 
-class LogoutHandler(BaseHandler):
+class UserDataHandler(BaseHandler):
+    """
+    """
 
+    @web.authenticated
     @gen.coroutine
-    def get(self):
+    def post(self):
         user = self.get_current_user()
-        if user:
-            self.clear_login_cookie()
-        self.redirect(self.hub.server.base_url)
+        self.log.debug("UserDataHandler - Request: {}, "
+                       "Body: {}".format(self.request, self.request.body))
+        data = None
+        try:
+            data = json_decode(self.request.body)
+        except JSONDecodeError as err:
+            self.log.error("UserDataHandler - Failed to json decode: {}, err: {}".format(
+                data, err
+            ))
+            raise web.HTTPError(500, "Failed to parse user data input")
+
+        if not data:
+            self.log.debug("UserDataHandler - no json data was received: {}".format(
+                self.request.json
+            ))
+            raise web.HTTPError(403, "No data was recieved that can be used"
+                                " to set an attribute")
+        self.log.debug("UserDataHandler - Received: {} as a user json data post".format(
+            data
+        ))
+
+        if not isinstance(data, dict):
+            self.log.error("UserDataHandler - invalid internal json post structure, "
+                           "expects: {}, recieved: {}".format(dict, type(data)))
+            raise web.HTTPError(403, "An invalid data type was recieved")
+
+        valid_attributes = self.authenticator.user_external_allow_attributes
+        if not valid_attributes:
+            raise web.HTTPError(500, "No attributes were enabled to be defined via "
+                                "user data, Please contact an administrator "
+                                "to resolve this")
+
+        for valid_attr in valid_attributes:
+            data_val = data.get(valid_attr, '')
+            if data_val:
+                try:
+                    setattr(user, valid_attr, data_val)
+                except AttributeError as err:
+                    self.log.error("UserDataHandler - Failed to set attribute: {} "
+                                   "to value: {}, err: {}".format(
+                                       "self.spawner.user." + valid_attr, data_val, err
+                                   ))
+            else:
+                self.log.debug("UserDataHandler - {} was not found "
+                               "recieved data: {}".format(valid_attr, data))
 
 
 class Parser(LoggingConfigurable):

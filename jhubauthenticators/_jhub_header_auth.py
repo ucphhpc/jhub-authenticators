@@ -1,7 +1,8 @@
 from tornado import gen, web
 from jupyterhub.auth import Authenticator
+from jupyterhub.handlers.login import LogoutHandler
 from traitlets import Dict, List, Type, Instance, Unicode, default
-from ._jhub_shared import HeaderLoginHandler, LogoutHandler, Parser
+from ._jhub_shared import HeaderLoginHandler, UserDataHandler, Parser, JSONParser
 
 
 class HeaderAuthenticator(Authenticator):
@@ -11,8 +12,9 @@ class HeaderAuthenticator(Authenticator):
     allowed_headers = Dict(
         default_value={'auth': 'Remote-User'},
         allow_none=False,
-        help="""Dict of HTTP/HTTPS headers that the authenticator will process.
-         The 'auth' key must be set to a header, default is Remote-User
+        help="""Dict of HTTP/HTTPS headers that the authenticator will process during login.
+         The 'auth' key must be set to a header, default is Remote-User.
+         Additional headers will be stored in the user's 'auth_state' session store
         """
     ).tag(config=True)
 
@@ -34,11 +36,17 @@ class HeaderAuthenticator(Authenticator):
     spawner_shared_headers = List(
         default_value=[],
         allow_none=False,
-        config=True,
-        help=""" List of headers that should be shared from the auth_state dict as environment
+        help="""List of headers that should be shared from the auth_state dict as environment
          variables to the spawner via the pre_spawn_start hook.
-        """
-    )
+        """).tag(config=True)
+
+    user_external_allow_attributes = List(
+        default_value=[],
+        traits=[Unicode()],
+        allow_none=True,
+        help="""List of user attributes that are allowed to be defined externally
+         via a JSON post request. Submit via /user-data
+        """).tag(config=True)
 
     def __init__(self, **kwargs):
         if 'auth' not in self.allowed_headers:
@@ -50,7 +58,8 @@ class HeaderAuthenticator(Authenticator):
     def get_handlers(self, app):
         return [
             (r'/login', HeaderLoginHandler),
-            (r'/logout', LogoutHandler)
+            (r'/logout', LogoutHandler),
+            (r'/user-data', UserDataHandler)
         ]
 
     @gen.coroutine

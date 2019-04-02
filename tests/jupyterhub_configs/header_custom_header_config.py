@@ -7,5 +7,3 @@ c.HeaderAuthenticator.allowed_headers = {'auth': 'Remote-User',
                                          'mount': 'Mount'}
 c.HeaderAuthenticator.header_parser_classes = {'auth': Parser,
                                                'mount': JSONParser}
-# Add mount to spawner environment
-c.HeaderAuthenticator.spawner_shared_headers = ['Mount']

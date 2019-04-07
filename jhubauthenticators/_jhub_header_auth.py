@@ -2,7 +2,7 @@ from tornado import gen, web
 from jupyterhub.auth import Authenticator
 from jupyterhub.handlers.login import LogoutHandler
 from traitlets import Dict, List, Type, Instance, Unicode, default
-from ._jhub_shared import HeaderLoginHandler, UserDataHandler, Parser, JSONParser
+from ._jhub_shared import HeaderLoginHandler, UserDataHandler, Parser
 
 
 class HeaderAuthenticator(Authenticator):

@@ -90,8 +90,7 @@ auth_state_json_data_jhub_cont = {'image': IMAGE, 'name': IMAGE_NAME,
                                   'detach': 'True',
                                   'environment': {'JUPYTERHUB_CRYPT_KEY':
                                                   base64.b64encode(os.urandom(32))},
-                                  'network': AUTH_JSON_DATA_NETWORK_NAME,
-                                  'command': 'jupyterhub -f /etc/jupyterhub/jupyterhub_config.py --debug'}
+                                  'network': AUTH_JSON_DATA_NETWORK_NAME}
 
 
 @pytest.mark.parametrize('build_image', [jhub_image], indirect=['build_image'])
@@ -303,7 +302,8 @@ def test_basic_cert_user_header_auth(build_image, container):
 
 
 @pytest.mark.parametrize('build_image', [jhub_image], indirect=['build_image'])
-@pytest.mark.parametrize('network', [auth_json_data_network_config], indirect=['network'])
+@pytest.mark.parametrize('network', [auth_json_data_network_config],
+                         indirect=['network'])
 @pytest.mark.parametrize('container', [auth_state_json_data_jhub_cont],
                          indirect=['container'])
 def test_json_data_post(build_image, network, container):

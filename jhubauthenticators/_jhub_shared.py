@@ -46,6 +46,8 @@ class HeaderLoginHandler(BaseHandler):
 
 class UserDataHandler(BaseHandler):
     """
+    Handles the post requests where an authenticated user want's to set an
+    internal user attribute with a JSON body.
     """
 
     @web.authenticated

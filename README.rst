@@ -85,3 +85,73 @@ the possibility of storing the actual value for debugging purposes in the user.r
 variable via the jupyterhub auth_state mechanism of passing information to
 the spawner as noted at `Authenticators <https://jupyterhub.readthedocs
 .io/en/stable/reference/authenticators.html>`_.
+
+---------------------
+Header Authentication
+---------------------
+
+This Header Authentication method provides multiple functionalities beyond mere authentication, and should in the future 
+replace the RemoteUserAuthenticator and DataRemoteUserAuthenticator. It can activated by adding the following to the JupyterHub configuration::
+
+    c.JupyterHub.authenticator_class = 'jhubauthenticators.HeaderAuthenticator'
+
+First it provides the possibility to define a custom authentication header,
+this is accomplished by overriding the default allowed_headers dict required 'auth' key::
+
+    c.HeaderAuthenticator.allowed_headers = {'auth': 'MyAuthHeader'}
+
+This will overrive the default 'Remote-User' header authentication to use the 'MyAuthHeader' instead.
+Beyond the 'auth' key, the administrator is allowed to set additional headers that the authenticator will accept requests on.
+
+For instance, if the 'MyCustomHeader' should be accepted aswell during authentication::
+
+    c.HeaderAuthenticator.allowed_headers = {'auth': 'MyAuthHeader',
+                                             'auth_data': 'MyCustomHeader'}
+
+Any information provided via the 'MyCustomHeader' during authentication will be added to the JupyterHub user's 'auth_state',
+dictionary as defined by `Authenticators <https://jupyterhub.readthedocs
+.io/en/stable/reference/authenticators.html>`_. The data will be added to the 'auth_state' by utilizing the header value in the 
+'allowed_headers' dictionary as the key in the 'auth_state' dictionary. For instance the above configuration, will produce the following user profile::
+
+    user = {
+        name: 'stored MyAuthHeader value',
+        'auth_state': {'MyCustomHeader': 'stored MyCustomHeader value'}
+    }
+
+It's important to note here, that this information is only persisted for the life-time of the authenticated session.
+
+If the administrator requires that the defined 'allowed_headers' should be parsed in a special way.
+The administrator can use the 'header_parser_classes' parameter to define how a request with a particular header should be parsed, E.g::
+    from jhubauthenticators import Parser, JSONParser
+
+    c.HeaderAuthenticator.header_parser_classes = {'auth': Parser,
+                                                   'auth_data': JSONParser}
+
+The 'auth' header is here set to be parsed by the default Parser, which just returns the provided value unchanged.
+The JSONParser, however does what it indicated, attempts to parse the data as JSON.
+
+In addition to these, the authenticator also provides the 'RegexUsernameParser' which can be used as an 'auth' parser, E.g::
+
+    # RegexUsernameParser
+    c.HeaderAuthenticator.header_parser_classes = {'auth': RegexUsernameParser}
+    # Email regex
+    RegexUsernameParser.username_extract_regex = '([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)'
+
+The authenticator can also be extended by additional by extending the Parser class and implement the required parse method, E.g::
+
+    class MyParser(Parser)
+
+        # MyAdvancedParser
+        def parse(self, data)
+            return data
+
+Finally, the HeaderAuthenticator also provides the administrator the possibility to define the 'user_external_allow_attributes' parameter.
+This allows defines which user attributes an authenticated user is allowed to set the 'user.data' variable via the '/user-data' URL, E.g::
+
+    c.HeaderAuthenticator.user_external_allow_attributes = ['data']
+
+By default the 'user_external_allow_attributes' allows no such attributes and has to be explicitly enabled/defined.
+In addition, any posted value to the '/user-data' path
+The provided data on this URL, has to be decodable as JSON or it will fail.
+
+Additional configuration examples can be found in the 'tests/jupyterhub_configs' directory.

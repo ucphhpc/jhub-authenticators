@@ -7,7 +7,8 @@ from ._jhub_shared import HeaderLoginHandler, UserDataHandler, Parser
 
 class HeaderAuthenticator(Authenticator):
     """
-    Accept the authenticated user name from the allowed_headers defined 'auth' HTTP header.
+    Authenticates the user via the allowed_headers
+    defined 'auth' HTTP/HTTPS header.
     """
     allowed_headers = Dict(
         default_value={'auth': 'Remote-User'},

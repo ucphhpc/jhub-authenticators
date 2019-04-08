@@ -101,16 +101,23 @@ By default, it exposes the following paths::
     '/logout' -> clears the users authenticated session.
     '/user-data' -> allows an authenticated user to provide data to be persisted during the authenticated session. Controlled via 'user_external_allow_attributes' parameter.
 
+Specify Authentication Header
+-----------------------------
+
 First it provides the possibility to define a custom authentication header,
 this is accomplished by overriding the default allowed_headers dict required ``auth`` key::
 
     c.HeaderAuthenticator.allowed_headers = {'auth': 'MyAuthHeader'}
 
 This will overrive the default ``Remote-User`` header authentication to use the ``MyAuthHeader`` instead.
+
+Additional Data Headers
+-----------------------
 Beyond the ``auth`` key, the administrator is allowed to set additional headers that the authenticator will accept requests on.
 
 For instance, if the ``MyCustomHeader`` should be accepted as well during authentication::
 
+    c.HeaderAuthenticator.enable_auth_state = True
     c.HeaderAuthenticator.allowed_headers = {'auth': 'MyAuthHeader',
                                              'auth_data': 'MyCustomHeader'}
 
@@ -126,6 +133,22 @@ dictionary as defined by `Authenticators <https://jupyterhub.readthedocs
 
 It's important to note here, that this information is only persisted for the life-time of the authenticated session.
 
+Sharing data with Spawner Environement
+--------------------------------------
+If any of the defined ``auth_state`` key-value pairs should be set as Spawner environement variables before a notebook is spawned, the ``spawner_shared_headers`` parameter is available to define this, E.g if the "MyCustomHeader' should do this, it can be accomplished with the following addition to the configuration::
+
+    c.HeaderAuthenticator.spawner_shared_headers = ['MyCustomHeader']
+
+Which during `pre_spawn_hook <https://jupyterhub.readthedocs
+.io/en/stable/reference/authenticators.html>`_ will produce the following environment variable::
+
+    ~>env | grep MyCustomHeader
+
+    MyCustomHeader="stored MyCustomHeader value"
+
+
+Special Parsers
+---------------
 If the administrator requires that the defined ``allowed_headers`` should be parsed in a special way.
 The administrator can use the ``header_parser_classes`` parameter to define how a request with a particular header should be parsed, E.g::
     from jhubauthenticators import Parser, JSONParser
@@ -157,6 +180,9 @@ Which can subsequently be activate by adding it to the ``header_parser_classes``
 
     # MyAdvancedParser
     c.HeaderAuthenticator.header_parser_classes = {'auth': MyParser}
+
+Set user state after authentication
+-----------------------------------
 
 Finally, the HeaderAuthenticator also provides the administrator the possibility to define the ``user_external_allow_attributes`` parameter.
 This allows defines which user attributes an authenticated user is allowed to set the ``user.data`` variable via the ``/user-data`` URL, E.g::

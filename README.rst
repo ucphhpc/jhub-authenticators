@@ -112,7 +112,7 @@ this is accomplished by overriding the default allowed_headers dict required ``a
 This will overrive the default ``Remote-User`` header authentication to use the ``MyAuthHeader`` instead.
 
 Additional User Data Headers
------------------------
+----------------------------
 Beyond the ``auth`` key, the administrator is allowed to set additional headers that the authenticator will accept requests on.
 
 For instance, if the ``MyCustomHeader`` should be accepted as well during authentication::
@@ -151,6 +151,7 @@ Special Parsers
 ---------------
 If the administrator requires that the defined ``allowed_headers`` should be parsed in a special way.
 The administrator can use the ``header_parser_classes`` parameter to define how a request with a particular header should be parsed, E.g::
+    
     from jhubauthenticators import Parser, JSONParser
 
     c.HeaderAuthenticator.header_parser_classes = {'auth': Parser,

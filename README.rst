@@ -137,13 +137,20 @@ In addition to these, the authenticator also provides the 'RegexUsernameParser' 
     # Email regex
     RegexUsernameParser.username_extract_regex = '([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)'
 
-The authenticator can also be extended by additional by extending the Parser class and implement the required parse method, E.g::
+Which will try to expand an email from the defined 'auth' allowed_headers Header. If this can't be accomplished, the user will not be authenticated.
+
+It is possible to define additional parsers by extending the Parser class and implementing the required parse method, E.g::
 
     class MyParser(Parser)
 
         # MyAdvancedParser
         def parse(self, data)
             return data
+
+Which can subsequently be activate by adding it to the 'header_parser_classes' parameter, E.g.::
+
+    # MyAdvancedParser
+    c.HeaderAuthenticator.header_parser_classes = {'auth': MyParser}
 
 Finally, the HeaderAuthenticator also provides the administrator the possibility to define the 'user_external_allow_attributes' parameter.
 This allows defines which user attributes an authenticated user is allowed to set the 'user.data' variable via the '/user-data' URL, E.g::

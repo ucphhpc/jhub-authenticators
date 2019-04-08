@@ -7,7 +7,7 @@ Jupyterhub Authenticators
 
 An extended collection of HTTP(S) header JupyterHub Authenticators that relies on proxy authenticating.
 Every mentioned authenticator should be used while following
-the mentioned security recommendations at `cwaldbieser <https://github.com/cwaldbieser/jhub_remote_user_authenticator>`_.
+the mentioned security recommendations at `cwaldbieser <https://github.com/cwaldbieser/jhub_remote_user_authenticator/blob/master/README.rst#architecture-and-security-recommendations>`_.
 
 ------------
 Installation

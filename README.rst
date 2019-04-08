@@ -111,7 +111,7 @@ this is accomplished by overriding the default allowed_headers dict required ``a
 
 This will overrive the default ``Remote-User`` header authentication to use the ``MyAuthHeader`` instead.
 
-Additional Data Headers
+Additional User Data Headers
 -----------------------
 Beyond the ``auth`` key, the administrator is allowed to set additional headers that the authenticator will accept requests on.
 
@@ -122,7 +122,7 @@ For instance, if the ``MyCustomHeader`` should be accepted as well during authen
                                              'auth_data': 'MyCustomHeader'}
 
 Any information provided via the ``MyCustomHeader`` during authentication will be added to the JupyterHub user's ``auth_state``,
-dictionary as defined by `Authenticators <https://jupyterhub.readthedocs
+dictionary as defined by `Authenticators auth_state <https://jupyterhub.readthedocs
 .io/en/stable/reference/authenticators.html>`_. The data will be added to the ``auth_state`` by utilizing the header value in the 
 ``allowed_headers`` dictionary as the key in the 'auth_state' dictionary. For instance the above configuration, will produce the following user profile::
 
@@ -133,8 +133,8 @@ dictionary as defined by `Authenticators <https://jupyterhub.readthedocs
 
 It's important to note here, that this information is only persisted for the life-time of the authenticated session.
 
-Sharing data with Spawner Environement
---------------------------------------
+Sharing auth_state data with Spawner Environement
+-------------------------------------------------
 If any of the defined ``auth_state`` key-value pairs should be set as Spawner environement variables before a notebook is spawned, the ``spawner_shared_headers`` parameter is available to define this, E.g if the "MyCustomHeader' should do this, it can be accomplished with the following addition to the configuration::
 
     c.HeaderAuthenticator.spawner_shared_headers = ['MyCustomHeader']
@@ -181,7 +181,7 @@ Which can subsequently be activate by adding it to the ``header_parser_classes``
     # MyAdvancedParser
     c.HeaderAuthenticator.header_parser_classes = {'auth': MyParser}
 
-Set user state after authentication
+Set User state after Authentication
 -----------------------------------
 
 Finally, the HeaderAuthenticator also provides the administrator the possibility to define the ``user_external_allow_attributes`` parameter.

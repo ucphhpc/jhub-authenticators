@@ -24,7 +24,7 @@ deploy:
     secure: AnHZHER3FZHJwJk0/r+pJOLPrZquz38ZfVAoPwiXOkNtEOK0ifnU6c+Uajq3euW+FFFLfA3+chOeHfUyNvR9ExVjMWxUVGPlNPRBo7Df691IOiU7eQQdO06UbJVlmkCBnLorOS0xgeGkwHPGjos01QJN7lJfSD3o6nGixLtXJ1cVRq8NQ+xbqhFADzkLIYFqWH0298Xs0pYU6BwYArOhbqu7EuqnSHyxF2phPEis6ybzrQvhkAvUQiw5n3gVsqVc6XFI3pK7AFIYNtdBuaODCwcRVf3DxdCAvSlhUGW7lQsD6qjLxJ7A4A48MkyJ/HPJPxwwtqcv2WvCLP0Gux6DemSOPJkNrYigX+ZOSj/F4Z7qgD4CcIU/UjKgSTxGREcAbLdr7x1mWCPGXWRTtodXXANQ0ORLZTlaY5Y7/A0vMa0N+vHQMxzmHdIR9uyIHoSlA1CcLfTmal6jFzmL87s0yvwZlVPU2I7ifHJ2TvgP42atnUcdv1CvkMtvcCykNMY0XaS+Da2u61YRHzPoyUuUmMyrUuQ4XXHCcsfOXu7L31pjC319wink+DHsp/AE8EqNhhSyXMlrS5vZ9QBXBS+7fdpC8kUzgeevcFimR/+LhDPYTxepnK1q0AX+kz8oGFpTKhcicyMHTMzIKCRYt5hMoevKqPEnXb33+HoPdjrTsgI=
   on:
     tags: true
-    branch: devel
-    python: '3.6'
+    branch: master
+    python: '3.7'
 notifications: 
   slack: raz-s:se1PurXsQJv03nBZa9XWMOOS

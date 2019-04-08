@@ -27,6 +27,8 @@ long_description = open('README.rst').read()
 setup(
     name='jhub-authenticators',
     version=version_ns['__version__'],
+    description='A collection of HTTP(s) JupyterHub Header Authenticators,'
+    'includes Header, Remote-User and Dummy',
     long_description=long_description,
     author="Rasmus Munk",
     author_email="munk1@live.dk",

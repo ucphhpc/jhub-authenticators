@@ -5,10 +5,9 @@
 Jupyterhub Authenticators
 =========================
 
-Authenticate to Jupyterhub using an authenticating proxy that can set
-the Remote-User header.
-Also supports for passing additional information to the jupyter user. This includes a
-list of user defined ``/data`` headers.
+An extended collection of HTTP(S) header JupyterHub Authenticators that relies on proxy authenticating.
+Every mentioned authenticator should be used while following
+the mentioned security recommendations at `cwaldbieser <https://github.com/cwaldbieser/jhub_remote_user_authenticator>`_.
 
 ------------
 Installation

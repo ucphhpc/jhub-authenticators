@@ -7,7 +7,7 @@ from ._jhub_shared import HeaderLoginHandler, UserDataHandler, Parser
 
 class HeaderAuthenticator(Authenticator):
     """
-    Accept the authenticated user name from the Remote-User HTTP header.
+    Accept the authenticated user name from the allowed_headers defined 'auth' HTTP header.
     """
     allowed_headers = Dict(
         default_value={'auth': 'Remote-User'},
@@ -69,16 +69,16 @@ class HeaderAuthenticator(Authenticator):
                                                                   type(data)))
         user_data = {}
         # Process remaining allowed_headers, save valid in user_data
-        for auth_index, auth_value in self.allowed_headers.items():
-            auth_data = data.get(auth_value, '')
+        for allowed_index, allowed_value in self.allowed_headers.items():
+            auth_data = data.get(allowed_value, '')
             if auth_data:
                 prepared_data = None
-                if auth_index in self.header_parsers:
-                    prepared_data = self.header_parsers[auth_index].parse(auth_data)
+                if allowed_index in self.header_parsers:
+                    prepared_data = self.header_parsers[allowed_index].parse(auth_data)
                 else:
                     prepared_data = data
                 if prepared_data:
-                    user_data[auth_value] = prepared_data
+                    user_data[allowed_value] = prepared_data
 
         self.log.debug("HeaderAuthenticator - Prepared user_data: {} "
                        "for auth check".format(user_data))

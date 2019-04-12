@@ -168,6 +168,11 @@ In addition to these, the authenticator also provides the ``RegexUsernameParser`
 
 Which will try to expand an email from the defined ``auth`` allowed_headers Header. If this can't be accomplished, the user will not be authenticated.
 
+Related to the ``username_extract_regex``, the ``RegexUsernameParser.replace_extract_chars`` parameter exists to accomplish post filtering of illegal characters on the extracted username, E.g::
+
+    # Replace every '@' and '.' char in the extracted username with '_'
+    RegexUsernameParser.replace_extract_chars = {'@': '_', '.': '_'}
+
 It is possible to define additional parsers by extending the Parser class and implementing the required parse method, E.g::
 
     class MyParser(Parser)

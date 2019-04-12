@@ -5,7 +5,7 @@ from tornado import gen, web
 from tornado.escape import json_decode
 from jupyterhub.handlers import BaseHandler
 from jupyterhub.utils import url_path_join
-from traitlets import CRegExp
+from traitlets import CRegExp, Dict
 from traitlets.config import LoggingConfigurable
 
 
@@ -116,6 +116,17 @@ class RegexUsernameParser(Parser):
     from the Remote - User header"""
     ).tag(config=True)
 
+    replace_extract_chars = Dict(
+        default_value=None,
+        allow_none=True,
+        help="""Dict of 'key' identified character(s) in the regex extract result that
+        should be replaced with 'value' character(s).
+
+        E.g: replace every '@' with a '.'
+        replace_extract_chars = {'@', '.'}
+        """
+    ).tag(config=True)
+
     def parse(self, data):
         if not data:
             self.log.error("RegexUsernameParser - Didn't "
@@ -148,6 +159,14 @@ class RegexUsernameParser(Parser):
         username = groups[0]
         self.log.debug("RegexUsernameParser - Found username_extract_regex "
                        "matched: {}".format(username))
+
+        if self.replace_extract_chars:
+            self.log.debug("RegexUsernameParser - replace_extract_chars "
+                           "{}".format(self.replace_extract_chars))
+            for replace_key, replace_val in self.replace_extract_chars.items():
+                username = username.replace(replace_key, replace_val)
+            self.log.info("RegexUsernameParser - username post replace_extract_chars: "
+                          " {}".format(username))
         return username
 
 

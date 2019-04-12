@@ -7,3 +7,4 @@ c.JupyterHub.authenticator_class = 'jhubauthenticators.HeaderAuthenticator'
 c.HeaderAuthenticator.header_parser_classes = {'auth': RegexUsernameParser}
 # Email regex
 RegexUsernameParser.username_extract_regex = '([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)'
+RegexUsernameParser.replace_extract_chars = {'@': '.'}

@@ -299,6 +299,7 @@ def test_basic_cert_user_header_auth(build_image, container):
         auth_response = session.post(''.join([jhub_base_url, '/login']),
                                      headers=auth_header)
         assert auth_response.status_code == 200
+        # TODO, validate username is actual email regex
 
 
 @pytest.mark.parametrize('build_image', [jhub_image], indirect=['build_image'])

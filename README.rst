@@ -56,9 +56,9 @@ that can have a global preset password for any account::
 
 Note! Don't use in production.
 
--------------------------------------------------------------
-Remote User Authentication extended with user-defined headers
--------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------
+Remote User Authentication extended with user-defined headers (Deprecated, use Header Authentication)
+-----------------------------------------------------------------------------------------------------
 
 Provides the capability to supply the jupyterhub user with additional state information
 via the /data path. This adds two base request paths to the jupyterhub web application::

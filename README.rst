@@ -121,8 +121,7 @@ For instance, if the ``MyCustomHeader`` should be accepted as well during authen
                                              'auth_data': 'MyCustomHeader'}
 
 Any information provided via the ``MyCustomHeader`` during authentication will be added to the JupyterHub user's ``auth_state``,
-dictionary as defined by `Authenticators auth_state <https://jupyterhub.readthedocs
-.io/en/stable/reference/authenticators.html>`_. The data will be added to the ``auth_state`` by utilizing the header value in the 
+dictionary as defined by `Authenticators auth_state <https://jupyterhub.readthedocs.io/en/stable/reference/authenticators.html#authentication-state>`_. The data will be added to the ``auth_state`` by utilizing the header value in the 
 ``allowed_headers`` dictionary as the key in the 'auth_state' dictionary. For instance the above configuration, will produce the following user profile::
 
     user = {

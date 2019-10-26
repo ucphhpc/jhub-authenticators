@@ -10,5 +10,7 @@ RUN pip install -r requirements.txt \
     && touch README.rst \
     && python setup.py install
 
+RUN pip install dockerspawner
+
 # Make sure the jupyter_config is mounted upon run
 CMD ["jupyterhub", "-f", "/etc/jupyterhub/jupyterhub_config.py"]

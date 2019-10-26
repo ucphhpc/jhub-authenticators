@@ -14,17 +14,18 @@ JHUB_URL = "http://127.0.0.1:8000"
 docker_path = dirname(dirname(realpath(__file__)))
 
 # mount paths
-config_path = join(dirname(realpath(__file__)), 'configs',
-                   'dummy_auth_jupyterhub_config.py')
+config_path = join(dirname(realpath(__file__)), 'jupyterhub_configs',
+                   'dummy_auth_config.py')
 
 # image build
 jhub_image = {'path': docker_path, 'tag': IMAGE,
               'rm': 'True', 'pull': 'True'}
 
+target_config = '/etc/jupyterhub/jupyterhub_config.py'
 # container cmd
 jhub_cont = {'image': IMAGE, 'name': IMAGE_NAME,
              'mounts': [Mount(source=config_path,
-                              target='/etc/jupyterhub/jupyterhub_config.py',
+                              target=target_config,
                               read_only=True,
                               type='bind')],
              'ports': {8000: 8000},

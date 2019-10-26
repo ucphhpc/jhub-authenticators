@@ -97,8 +97,8 @@ auth_state_json_data_jhub_cont = {'image': IMAGE, 'name': IMAGE_NAME,
 @pytest.mark.parametrize('container', [default_jhub_cont], indirect=['container'])
 def test_default_header_config(build_image, container):
     """
-    Test that the client is able to.
-    Once authenticated, pass a correctly formatted Mount Header
+    Test that an authenticated client is able to pass
+     a correctly formatted Mount Header
     """
     # not ideal, wait for the jhub container to start, update with proper check
     time.sleep(5)

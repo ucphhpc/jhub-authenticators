@@ -3,12 +3,12 @@ sudo: required
 services: docker
 language: python
 python:
-- '2.7'
 - '3.5'
 - '3.6'
 - '3.7'
+- '3.8'
 install:
-- docker pull jupyterhub/jupyterhub:0.9.2
+- docker pull jupyterhub/jupyterhub:1.0.0
 - docker pull jupyter/base-notebook:latest
 - pip install -r tests/requirements.txt
 script:
@@ -16,15 +16,15 @@ script:
 - flake8
 - pytest
 deploy:
-  skip_cleanup: true
   distributions: sdist bdist_wheel
   provider: pypi
+  skip_existing: true
+  skip_cleanup: true
   user: rasmunk
   password:
     secure: AnHZHER3FZHJwJk0/r+pJOLPrZquz38ZfVAoPwiXOkNtEOK0ifnU6c+Uajq3euW+FFFLfA3+chOeHfUyNvR9ExVjMWxUVGPlNPRBo7Df691IOiU7eQQdO06UbJVlmkCBnLorOS0xgeGkwHPGjos01QJN7lJfSD3o6nGixLtXJ1cVRq8NQ+xbqhFADzkLIYFqWH0298Xs0pYU6BwYArOhbqu7EuqnSHyxF2phPEis6ybzrQvhkAvUQiw5n3gVsqVc6XFI3pK7AFIYNtdBuaODCwcRVf3DxdCAvSlhUGW7lQsD6qjLxJ7A4A48MkyJ/HPJPxwwtqcv2WvCLP0Gux6DemSOPJkNrYigX+ZOSj/F4Z7qgD4CcIU/UjKgSTxGREcAbLdr7x1mWCPGXWRTtodXXANQ0ORLZTlaY5Y7/A0vMa0N+vHQMxzmHdIR9uyIHoSlA1CcLfTmal6jFzmL87s0yvwZlVPU2I7ifHJ2TvgP42atnUcdv1CvkMtvcCykNMY0XaS+Da2u61YRHzPoyUuUmMyrUuQ4XXHCcsfOXu7L31pjC319wink+DHsp/AE8EqNhhSyXMlrS5vZ9QBXBS+7fdpC8kUzgeevcFimR/+LhDPYTxepnK1q0AX+kz8oGFpTKhcicyMHTMzIKCRYt5hMoevKqPEnXb33+HoPdjrTsgI=
   on:
     tags: true
     branch: master
-    python: '3.7'
 notifications: 
   slack: raz-s:se1PurXsQJv03nBZa9XWMOOS

@@ -18,9 +18,11 @@ class HeaderLoginHandler(BaseHandler):
     def prepare(self):
         """ Checks whether the user is authenticated, if so
          the user is redirected to / hub.server.base_url / home """
-        if self.get_current_user():
-            self.log.info("User: {} is already authenticated"
-                          .format(self.get_current_user(), self.get_current_user().name))
+        user = yield self.get_current_user()
+        if user:
+            if hasattr(user, 'name'):
+                self.log.info("User: {} is already authenticated"
+                              .format(user.name))
 
             argument = self.get_argument("next", None, True)
             if argument:
@@ -53,7 +55,7 @@ class UserDataHandler(BaseHandler):
     @web.authenticated
     @gen.coroutine
     def post(self):
-        user = self.get_current_user()
+        user = yield self.get_current_user()
         self.log.debug("UserDataHandler - Request: {}, "
                        "Body: {}".format(self.request, self.request.body))
         data = None
@@ -123,7 +125,7 @@ class RegexUsernameParser(Parser):
         should be replaced with 'value' character(s).
 
         E.g: replace every '@' with a '.'
-        replace_extract_chars = {'@', '.'}
+        replace_extract_chars = {'@': '.'}
         """
     ).tag(config=True)
 

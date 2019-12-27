@@ -55,6 +55,7 @@ class PartialBaseURLHandler(BaseHandler):
     """
     Fix against /base_url requests are not redirected to /base_url/home
     """
+
     @web.authenticated
     @gen.coroutine
     def get(self):
@@ -65,7 +66,7 @@ class RemoteUserLogoutHandler(BaseHandler):
 
     @gen.coroutine
     def get(self):
-        user = self.get_current_user()
+        user = yield self.get_current_user()
         if user:
             self.clear_login_cookie()
         self.redirect(self.hub.server.base_url)
@@ -76,14 +77,18 @@ class RemoteUserLoginHandler(BaseHandler):
     @gen.coroutine
     def prepare(self):
         """ login user """
-        if self.get_current_user() is not None:
-            self.log.info("User: {} is already authenticated"
-                          .format(self.get_current_user(), self.get_current_user().name))
+        user = yield self.get_current_user()
+        if user:
+            if hasattr(user, 'name'):
+                self.log.info("User: {} is already authenticated"
+                              .format(user.name))
             self.redirect(url_path_join(self.hub.server.base_url, 'home'))
         else:
-            user_data = extract_headers(self.request, self.authenticator.auth_headers)
+            user_data = extract_headers(self.request,
+                                        self.authenticator.auth_headers)
             if 'Remote-User' not in user_data:
-                raise web.HTTPError(401, "You are not Authenticated to do this")
+                raise web.HTTPError(401,
+                                    "You are not Authenticated to do this")
             yield self.login_user(user_data)
 
             argument = self.get_argument("next", None, True)
@@ -110,7 +115,7 @@ class DataHandler(BaseHandler):
             raise web.HTTPError(403, "No valid data header was received")
 
         self.log.debug("Prepared user_data dict: {}".format(user_data))
-        user = self.get_current_user()
+        user = yield self.get_current_user()
         for k, d in user_data.items():
             # Try to parse the passed information into a valid dtype
             try:
@@ -208,7 +213,7 @@ class DataRemoteUserAuthenticator(RemoteUserAuthenticator):
         # Login
         real_name = data['Remote-User'].lower()
         # Make it alphanumeric
-        pattern = re.compile('[\W_]+', re.UNICODE)
+        pattern = re.compile('[\\W]+', re.UNICODE)
         real_name = pattern.sub('', real_name)
         encoded_name = safeinput_encode(real_name)
 

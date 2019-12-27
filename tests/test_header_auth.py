@@ -49,10 +49,11 @@ email_jhub_cont = {'image': IMAGE, 'name': IMAGE_NAME,
                    'ports': {8000: 8000},
                    'detach': 'True'}
 custom_data_header_jhub_cont = {'image': IMAGE, 'name': IMAGE_NAME,
-                                'mounts': [Mount(source=custom_data_header_config,
-                                                 target=target_config,
-                                                 read_only=True,
-                                                 type='bind')],
+                                'mounts': [
+                                    Mount(source=custom_data_header_config,
+                                          target=target_config,
+                                          read_only=True,
+                                          type='bind')],
                                 'ports': {8000: 8000},
                                 'detach': 'True'}
 AUTH_STATE_NETWORK_NAME = 'jhub_auth_state_network'
@@ -60,41 +61,46 @@ auth_state_network_config = {'name': AUTH_STATE_NETWORK_NAME,
                              'driver': 'bridge',
                              'attachable': True}
 auth_state_data_header_jhub_cont = {'image': IMAGE, 'name': IMAGE_NAME,
-                                    'mounts': [Mount(source=auth_state_header_config,
-                                                     target=target_config,
-                                                     read_only=True,
-                                                     type='bind'),
-                                               Mount(source='/var/run/docker.sock',
-                                                     target='/var/run/docker.sock',
-                                                     read_only=True,
-                                                     type='bind')],
+                                    'mounts': [
+                                        Mount(source=auth_state_header_config,
+                                              target=target_config,
+                                              read_only=True,
+                                              type='bind'),
+                                        Mount(source='/var/run/docker.sock',
+                                              target='/var/run/docker.sock',
+                                              read_only=True,
+                                              type='bind')],
                                     'ports': {8000: 8000},
                                     'detach': 'True',
-                                    'environment': {'JUPYTERHUB_CRYPT_KEY':
-                                                    base64.b64encode(os.urandom(32))},
+                                    'environment': {
+                                        'JUPYTERHUB_CRYPT_KEY':
+                                            base64.b64encode(os.urandom(32))},
                                     'network': AUTH_STATE_NETWORK_NAME}
 AUTH_JSON_DATA_NETWORK_NAME = 'jhub_auth_json_network'
 auth_json_data_network_config = {'name': AUTH_JSON_DATA_NETWORK_NAME,
                                  'driver': 'bridge',
                                  'attachable': True}
 auth_state_json_data_jhub_cont = {'image': IMAGE, 'name': IMAGE_NAME,
-                                  'mounts': [Mount(source=auth_json_data_config,
-                                                   target=target_config,
-                                                   read_only=True,
-                                                   type='bind'),
-                                             Mount(source='/var/run/docker.sock',
-                                                   target='/var/run/docker.sock',
-                                                   read_only=True,
-                                                   type='bind')],
+                                  'mounts': [
+                                      Mount(source=auth_json_data_config,
+                                            target=target_config,
+                                            read_only=True,
+                                            type='bind'),
+                                      Mount(source='/var/run/docker.sock',
+                                            target='/var/run/docker.sock',
+                                            read_only=True,
+                                            type='bind')],
                                   'ports': {8000: 8000},
                                   'detach': 'True',
-                                  'environment': {'JUPYTERHUB_CRYPT_KEY':
-                                                  base64.b64encode(os.urandom(32))},
+                                  'environment': {
+                                      'JUPYTERHUB_CRYPT_KEY':
+                                          base64.b64encode(os.urandom(32))},
                                   'network': AUTH_JSON_DATA_NETWORK_NAME}
 
 
 @pytest.mark.parametrize('build_image', [jhub_image], indirect=['build_image'])
-@pytest.mark.parametrize('container', [default_jhub_cont], indirect=['container'])
+@pytest.mark.parametrize('container', [default_jhub_cont],
+                         indirect=['container'])
 def test_default_header_config(build_image, container):
     """
     Test that an authenticated client is able to pass
@@ -167,7 +173,8 @@ def test_custom_data_header_auth(build_image, container):
 
 
 @pytest.mark.parametrize('build_image', [jhub_image], indirect=['build_image'])
-@pytest.mark.parametrize('network', [auth_state_network_config], indirect=['network'])
+@pytest.mark.parametrize('network', [auth_state_network_config],
+                         indirect=['network'])
 @pytest.mark.parametrize('container', [auth_state_data_header_jhub_cont],
                          indirect=['container'])
 def test_auth_state_header_auth(build_image, network, container):
@@ -215,7 +222,8 @@ def test_auth_state_header_auth(build_image, network, container):
         time.sleep(15)
         post_spawn_containers = client.containers.list()
 
-        jupyter_containers = [jup_container for jup_container in post_spawn_containers
+        jupyter_containers = [jup_container for jup_container in
+                              post_spawn_containers
                               if "jupyter-" in jup_container.name]
         assert len(jupyter_containers) > 0
         # Check container for passed environments
@@ -228,7 +236,8 @@ def test_auth_state_header_auth(build_image, network, container):
 
 
 @pytest.mark.parametrize('build_image', [jhub_image], indirect=['build_image'])
-@pytest.mark.parametrize('container', [email_jhub_cont], indirect=['container'])
+@pytest.mark.parametrize('container', [email_jhub_cont],
+                         indirect=['container'])
 def test_remote_oid_user_header_auth(build_image, container):
     """
     Test that the client is able to.
@@ -264,7 +273,8 @@ def test_remote_oid_user_header_auth(build_image, container):
 
 
 @pytest.mark.parametrize('build_image', [jhub_image], indirect=['build_image'])
-@pytest.mark.parametrize('container', [email_jhub_cont], indirect=['container'])
+@pytest.mark.parametrize('container', [email_jhub_cont],
+                         indirect=['container'])
 def test_basic_cert_user_header_auth(build_image, container):
     """
     Test that the client is able to.
@@ -286,8 +296,8 @@ def test_basic_cert_user_header_auth(build_image, container):
                 jhub_ready = True
 
         # Auth requests
-        remote_user = '/C=DK/ST=NA/L=NA/O=NBI/OU=NA/CN=Name'\
-            '/emailAddress=mail@sdfsf.com'
+        remote_user = '/C=DK/ST=NA/L=NA/O=NBI/OU=NA/CN=Name' \
+                      '/emailAddress=mail@sdfsf.com'
         auth_header = {
             'Remote-User': remote_user
         }

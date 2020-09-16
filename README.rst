@@ -1,9 +1,10 @@
-.. image:: https://travis-ci.org/rasmunk/jhub-authenticators.svg?branch=master
-    :target: https://travis-ci.org/rasmunk/jhub-authenticators
-
 =========================
 Jupyterhub Authenticators
 =========================
+.. image:: https://travis-ci.org/rasmunk/jhub-authenticators.svg?branch=master
+    :target: https://travis-ci.org/rasmunk/jhub-authenticators
+.. image:: https://badge.fury.io/py/jhub-authenticators.svg
+    :target: https://badge.fury.io/py/jhub-authenticators
 
 An extended collection of HTTP(S) header JupyterHub Authenticators that relies on proxy authenticating.
 Every mentioned authenticator should be used while following

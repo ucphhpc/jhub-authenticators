@@ -19,36 +19,33 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 # Get the current package version.
 version_ns = {}
-with open(pjoin(here, 'version.py')) as f:
+with open(pjoin(here, "version.py")) as f:
     exec(f.read(), {}, version_ns)
 
-long_description = open('README.rst').read()
+long_description = open("README.rst").read()
 
 setup(
-    name='jhub-authenticators',
-    version=version_ns['__version__'],
-    description='A collection of HTTP(s) JupyterHub Header Authenticators,'
-    'includes Header, Remote-User and Dummy',
+    name="jhub-authenticators",
+    version=version_ns["__version__"],
+    description="A collection of HTTP(s) JupyterHub Header Authenticators,"
+    "includes Header, Remote-User and Dummy",
     long_description=long_description,
     author="Rasmus Munk",
     author_email="munk1@live.dk",
-    packages=['jhubauthenticators'],
+    packages=["jhubauthenticators"],
     url="https://github.com/rasmunk/jhub-authenticators",
     license="GPLv3",
     platforms="Linux, Mac OS X",
-    keywords=['Interactive', 'Interpreter', 'Shell', 'Web'],
-    install_requires=[
-        'jupyterhub>=0.9.2',
-        'docutils>=0.14'
-    ],
+    keywords=["Interactive", "Interpreter", "Shell", "Web"],
+    install_requires=["jupyterhub>=0.9.2", "docutils>=0.14"],
     classifiers=[
-        'Intended Audience :: Developers',
-        'Intended Audience :: System Administrators',
-        'Intended Audience :: Science/Research',
-        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
+        "Intended Audience :: Developers",
+        "Intended Audience :: System Administrators",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
     ],
 )

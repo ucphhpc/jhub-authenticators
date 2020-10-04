@@ -4,7 +4,7 @@ import docker
 from docker.errors import NotFound
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def network(request):
     """Create the docker network that the hub and server services will
     use to communicate.
@@ -21,7 +21,7 @@ def network(request):
             removed = True
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def build_image(request):
     client = docker.from_env()
     _image = client.images.build(**request.param)
@@ -40,7 +40,7 @@ def build_image(request):
             removed = True
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def pull_image(request):
     client = docker.from_env()
     _image = client.images.pull(**request.param)
@@ -59,7 +59,7 @@ def pull_image(request):
             removed = True
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def container(request):
     client = docker.from_env()
     _container = client.containers.run(**request.param)
@@ -68,7 +68,7 @@ def container(request):
         _container = client.containers.get(_container.name)
 
     yield _container
-    assert hasattr(_container, 'id')
+    assert hasattr(_container, "id")
 
     _container.stop()
     _container.wait()

@@ -1,8 +1,8 @@
 =========================
 Jupyterhub Authenticators
 =========================
-.. image:: https://travis-ci.org/rasmunk/jhub-authenticators.svg?branch=master
-    :target: https://travis-ci.org/rasmunk/jhub-authenticators
+.. image:: https://travis-ci.com/rasmunk/jhub-authenticators.svg?branch=master
+    :target: https://travis-ci.com/rasmunk/jhub-authenticators
 .. image:: https://badge.fury.io/py/jhub-authenticators.svg
     :target: https://badge.fury.io/py/jhub-authenticators
 

@@ -1,25 +1,21 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# Copyright (c) Juptyer Development Team.
-# Distributed under the terms of the Modified BSD License.
-
-# -----------------------------------------------------------------------------
-# Minimal Python version sanity check (from IPython/Jupyterhub)
-# -----------------------------------------------------------------------------
-
-from __future__ import print_function
-
 import os
+from setuptools import setup, find_packages
 
-from setuptools import setup
+here = os.path.dirname(__file__)
 
-pjoin = os.path.join
-here = os.path.abspath(os.path.dirname(__file__))
 
-# Get the current package version.
+def read(path):
+    with open(path, "r") as _file:
+        return _file.read()
+
+
+def read_req(name):
+    path = os.path.join(here, name)
+    return [req.strip() for req in read(path).splitlines() if req.strip()]
+
+
 version_ns = {}
-with open(pjoin(here, "version.py")) as f:
+with open(os.path.join(here, "version.py")) as f:
     exec(f.read(), {}, version_ns)
 
 long_description = open("README.rst").read()
@@ -32,20 +28,25 @@ setup(
     long_description=long_description,
     author="Rasmus Munk",
     author_email="munk1@live.dk",
-    packages=["jhubauthenticators"],
-    url="https://github.com/rasmunk/jhub-authenticators",
     license="GPLv3",
-    platforms="Linux, Mac OS X",
     keywords=["Interactive", "Interpreter", "Shell", "Web"],
-    install_requires=["jupyterhub>=0.9.2", "docutils>=0.14"],
+    url="https://github.com/rasmunk/jhub-authenticators",
+    packages=find_packages(),
+    install_requires=read_req("requirements.txt"),
+    extras_require={
+        "test": read_req("tests/requirements.txt"),
+        "dev": read_req("requirements-dev.txt"),
+    },
+    project_urls={"Source Code": "https://github.com/rasmunk/jhub-authenticators"},
     classifiers=[
         "Intended Audience :: Developers",
         "Intended Audience :: System Administrators",
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
-        "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
     ],
+    platforms="Linux, Mac OSX",
 )

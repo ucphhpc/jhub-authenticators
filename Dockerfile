@@ -28,12 +28,14 @@ ADD jhubauthenticators /app/jhubauthenticators
 ADD setup.py /app/setup.py
 ADD version.py /app/version.py
 ADD requirements.txt /app/requirements.txt
+ADD requirements-dev.txt /app/requirements-dev.txt
+ADD tests/requirements.txt /app/tests/requirements.txt
+
 
 WORKDIR /app
 
-RUN pip3 install -r requirements.txt \
-    && touch README.rst \
-    && python3 setup.py install
+RUN touch README.rst \
+    && pip3 install .
 
 RUN pip3 install dockerspawner
 

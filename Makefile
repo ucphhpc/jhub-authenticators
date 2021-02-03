@@ -14,4 +14,3 @@ clean:
 
 push:
 	docker push ${OWNER}/${IMAGE}:${TAG}
-

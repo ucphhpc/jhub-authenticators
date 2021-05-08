@@ -16,8 +16,8 @@ class HeaderLoginHandler(BaseHandler):
 
     @gen.coroutine
     def prepare(self):
-        """ Checks whether the user is authenticated, if so
-         the user is redirected to / hub.server.base_url / home """
+        """Checks whether the user is authenticated, if so
+        the user is redirected to / hub.server.base_url / home"""
         user = yield self.get_current_user()
         if user:
             if hasattr(user, "name"):

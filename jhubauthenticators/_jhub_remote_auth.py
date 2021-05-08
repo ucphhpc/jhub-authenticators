@@ -74,7 +74,7 @@ class RemoteUserLogoutHandler(BaseHandler):
 class RemoteUserLoginHandler(BaseHandler):
     @gen.coroutine
     def prepare(self):
-        """ login user """
+        """login user"""
         user = yield self.get_current_user()
         if user:
             if hasattr(user, "name"):

@@ -1,4 +1,4 @@
-jupyterhub>=1.1.*
-docutils>=0.15.*
-tornado>=6.0.*
-traitlets>=4.3.*
+jupyterhub>=1.4.0
+docutils>=0.17.1
+tornado>=6.1
+traitlets>=5.0.5

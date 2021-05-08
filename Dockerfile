@@ -20,7 +20,7 @@ RUN apt-get update && apt-get install --no-install-recommends -yq \
 
 RUN python3 -m pip install --upgrade setuptools pip wheel
 
-RUN pip3 install jupyterhub==1.1.0
+RUN pip3 install jupyterhub==1.4.0
 
 RUN npm install -g configurable-http-proxy
 
@@ -30,7 +30,6 @@ ADD version.py /app/version.py
 ADD requirements.txt /app/requirements.txt
 ADD requirements-dev.txt /app/requirements-dev.txt
 ADD tests/requirements.txt /app/tests/requirements.txt
-
 
 WORKDIR /app
 

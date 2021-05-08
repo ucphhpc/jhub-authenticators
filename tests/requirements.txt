@@ -1,5 +1,2 @@
-pytest==6.1.*
-requests==2.22.0
-docker==4.1.0
-docutils==0.15.2
-flake8==3.8.4
+pytest==6.4.2
+docker==5.0.0

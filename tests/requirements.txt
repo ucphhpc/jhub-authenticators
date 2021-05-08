@@ -1,2 +1,2 @@
-pytest==6.4.2
+pytest==6.2.4
 docker==5.0.0

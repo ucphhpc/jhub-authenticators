@@ -148,8 +148,7 @@ class RemoteUserAuthenticator(Authenticator):
             (r"/logout", RemoteUserLogoutHandler),
         ]
 
-    @gen.coroutine
-    def authenticate(self, *args):
+    async def authenticate(self, *args):
         raise NotImplementedError()
 
 
@@ -172,8 +171,7 @@ class RemoteUserLocalAuthenticator(LocalAuthenticator):
             (r"/logout", RemoteUserLogoutHandler),
         ]
 
-    @gen.coroutine
-    def authenticate(self, *args):
+    async def authenticate(self, *args):
         raise NotImplementedError()
 
 
@@ -200,8 +198,7 @@ class DataRemoteUserAuthenticator(RemoteUserAuthenticator):
             (r"/data", DataHandler),
         ]
 
-    @gen.coroutine
-    def authenticate(self, handler, data):
+    async def authenticate(self, handler, data):
         if "Remote-User" not in data:
             self.log.info("A Remote-User header is required")
             return None
@@ -217,8 +214,7 @@ class DataRemoteUserAuthenticator(RemoteUserAuthenticator):
         self.log.info("Authenticated: {} - Login".format(user))
         return user
 
-    @gen.coroutine
-    def pre_spawn_start(self, user, spawner):
+    async def pre_spawn_start(self, user, spawner):
         """Pass upstream_token to spawner via environment variable"""
         auth_state = yield user.get_auth_state()
         if not auth_state:

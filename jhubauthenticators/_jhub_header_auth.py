@@ -1,4 +1,4 @@
-from tornado import gen, web
+from tornado import web
 from jupyterhub.auth import Authenticator
 from jupyterhub.handlers.login import LogoutHandler
 from traitlets import Dict, List, Type, Instance, Unicode, default
@@ -70,8 +70,7 @@ class HeaderAuthenticator(Authenticator):
             (r"/user-data", UserDataHandler),
         ]
 
-    @gen.coroutine
-    def authenticate(self, handler, data):
+    async def authenticate(self, handler, data):
         self.log.debug(
             "HeaderAuthenticator - Request authentication with "
             "handler: {}, data: {} of type: {}".format(handler, data, type(data))
@@ -113,8 +112,7 @@ class HeaderAuthenticator(Authenticator):
         self.log.info("Authenticated: {} - Login".format(user))
         return user
 
-    @gen.coroutine
-    def pre_spawn_start(self, user, spawner):
+    async def pre_spawn_start(self, user, spawner):
         """Pass upstream_token to spawner via environment variable"""
         auth_state = yield user.get_auth_state()
         if not auth_state:

@@ -35,6 +35,7 @@ jhub_cont = {
     ],
     "ports": {8000: 8000},
     "detach": "True",
+    "command": ["jupyterhub", "-f", "/etc/jupyterhub/jupyterhub_config.py"],
 }
 
 

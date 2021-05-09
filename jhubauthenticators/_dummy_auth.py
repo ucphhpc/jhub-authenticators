@@ -1,5 +1,4 @@
 from jupyterhub.auth import Authenticator
-from tornado import gen
 from traitlets import Unicode
 
 
@@ -10,8 +9,7 @@ class DummyAuthenticator(Authenticator):
 
     password = Unicode(None, allow_none=True, config=True, help="""global password""")
 
-    @gen.coroutine
-    def authenticate(self, handler, data):
+    async def authenticate(self, handler, data):
         if data["password"] != self.password:
             return None
         else:

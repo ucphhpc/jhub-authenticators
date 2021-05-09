@@ -36,6 +36,7 @@ default_jhub_cont = {
     ],
     "ports": {8000: 8000},
     "detach": "True",
+    "command": ["jupyterhub", "-f", "/etc/jupyterhub/jupyterhub_config.py"],
 }
 email_jhub_cont = {
     "image": IMAGE,
@@ -50,6 +51,7 @@ email_jhub_cont = {
     ],
     "ports": {8000: 8000},
     "detach": "True",
+    "command": ["jupyterhub", "-f", "/etc/jupyterhub/jupyterhub_config.py"],
 }
 custom_data_header_jhub_cont = {
     "image": IMAGE,
@@ -64,6 +66,7 @@ custom_data_header_jhub_cont = {
     ],
     "ports": {8000: 8000},
     "detach": "True",
+    "command": ["jupyterhub", "-f", "/etc/jupyterhub/jupyterhub_config.py"],
 }
 AUTH_STATE_NETWORK_NAME = "jhub_auth_state_network"
 auth_state_network_config = {
@@ -92,6 +95,7 @@ auth_state_data_header_jhub_cont = {
     "detach": "True",
     "environment": {"JUPYTERHUB_CRYPT_KEY": base64.b64encode(os.urandom(32))},
     "network": AUTH_STATE_NETWORK_NAME,
+    "command": ["jupyterhub", "--debug", "-f", "/etc/jupyterhub/jupyterhub_config.py"],
 }
 AUTH_JSON_DATA_NETWORK_NAME = "jhub_auth_json_network"
 auth_json_data_network_config = {
@@ -120,6 +124,7 @@ auth_state_json_data_jhub_cont = {
     "detach": "True",
     "environment": {"JUPYTERHUB_CRYPT_KEY": base64.b64encode(os.urandom(32))},
     "network": AUTH_JSON_DATA_NETWORK_NAME,
+    "command": ["jupyterhub", "-f", "/etc/jupyterhub/jupyterhub_config.py"],
 }
 
 
@@ -245,7 +250,7 @@ def test_auth_state_header_auth(build_image, network, container):
         # Spawn with auth_state
         spawn_response = session.post("".join([jhub_base_url, "/spawn"]))
         assert spawn_response.status_code == 200
-        time.sleep(15)
+        time.sleep(20)
         post_spawn_containers = client.containers.list()
 
         jupyter_containers = [

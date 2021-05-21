@@ -19,7 +19,6 @@ with open(os.path.join(here, "version.py")) as f:
     exec(f.read(), {}, version_ns)
 
 long_description = open("README.rst").read()
-
 setup(
     name="jhub-authenticators",
     version=version_ns["__version__"],

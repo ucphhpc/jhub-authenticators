@@ -114,7 +114,7 @@ class HeaderAuthenticator(Authenticator):
 
     async def pre_spawn_start(self, user, spawner):
         """Pass upstream_token to spawner via environment variable"""
-        auth_state = yield user.get_auth_state()
+        auth_state = await user.get_auth_state()
         if not auth_state:
             self.log.debug(
                 "HeaderAuthenticator - pre_spawn_hook, "

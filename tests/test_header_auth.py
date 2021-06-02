@@ -128,6 +128,33 @@ auth_state_json_data_jhub_cont = {
 }
 
 
+def wait_for_service(client, service_name, minutes=5):
+    found = False
+    sec_waited = 0
+    sleep_for = 20
+    while not found:
+        containers = get_containers(client, service_name)
+        if len(containers) > 0:
+            found = True
+
+        time.sleep(sleep_for)
+        sec_waited += sleep_for
+        if sec_waited > (minutes * 60):
+            break
+
+    return found
+
+
+def get_containers(client, service_name):
+    post_spawn_containers = client.containers.list()
+    found_containers = [
+        container
+        for container in post_spawn_containers
+        if service_name in container.name
+    ]
+    return found_containers
+
+
 @pytest.mark.parametrize("build_image", [jhub_image], indirect=["build_image"])
 @pytest.mark.parametrize("container", [default_jhub_cont], indirect=["container"])
 def test_default_header_config(build_image, container):
@@ -135,9 +162,10 @@ def test_default_header_config(build_image, container):
     Test that an authenticated client is able to pass
      a correctly formatted Mount Header
     """
-    # not ideal, wait for the jhub container to start, update with proper check
-    time.sleep(5)
     client = docker.from_env()
+    service_name = "jupyterhub"
+    if not wait_for_service(client, service_name, minutes=5):
+        raise RuntimeError("The JupyterHub service never emerged")
     containers = client.containers.list()
     assert len(containers) > 0
     with requests.session() as session:
@@ -173,9 +201,10 @@ def test_custom_data_header_auth(build_image, container):
     Test that the client is able to.
     Once authenticated, pass a correctly formatted Mount Header
     """
-    # not ideal, wait for the jhub container to start, update with proper check
-    time.sleep(5)
     client = docker.from_env()
+    service_name = "jupyterhub"
+    if not wait_for_service(client, service_name, minutes=5):
+        raise RuntimeError("The JupyterHub service never emerged")
     containers = client.containers.list()
     assert len(containers) > 0
     with requests.session() as session:
@@ -188,7 +217,7 @@ def test_custom_data_header_auth(build_image, container):
                 jhub_ready = True
 
         # Auth requests
-        remote_user = "myusername"
+        remote_user = "myusername2"
         data_dict = {
             "HOST": "hostaddr",
             "USERNAME": "randomstring_unique_string",
@@ -212,9 +241,10 @@ def test_auth_state_header_auth(build_image, network, container):
     Test that the client is able to. Test that auth_state recieves
     the specified test data headers.
     """
-    # not ideal, wait for the jhub container to start, update with proper check
-    time.sleep(5)
     client = docker.from_env()
+    service_name = "jupyterhub"
+    if not wait_for_service(client, service_name, minutes=5):
+        raise RuntimeError("The JupyterHub service never emerged")
     containers = client.containers.list()
     assert len(containers) > 0
     with requests.session() as session:
@@ -227,7 +257,7 @@ def test_auth_state_header_auth(build_image, network, container):
                 jhub_ready = True
 
         # Auth requests
-        remote_user = "myusername"
+        remote_user = "myusername3"
         data_str = "blablabla"
         data_dict = {
             "HOST": "hostaddr",
@@ -250,15 +280,19 @@ def test_auth_state_header_auth(build_image, network, container):
         # Spawn with auth_state
         spawn_response = session.post("".join([jhub_base_url, "/spawn"]))
         assert spawn_response.status_code == 200
-        time.sleep(20)
-        post_spawn_containers = client.containers.list()
+        # Wait for 3 minutes
+        service_name = "jupyter-"
+        wait_min = 5
+        if not wait_for_service(client, service_name, minutes=wait_min):
+            raise RuntimeError(
+                "No service with name: {} appeared within: {} minutes".format(
+                    service_name, wait_min
+                )
+            )
 
-        jupyter_containers = [
-            jup_container
-            for jup_container in post_spawn_containers
-            if "jupyter-" in jup_container.name
-        ]
+        jupyter_containers = get_containers(client, service_name)
         assert len(jupyter_containers) > 0
+
         # Check container for passed environments
         for container in jupyter_containers:
             envs = {
@@ -277,9 +311,10 @@ def test_remote_oid_user_header_auth(build_image, container):
     Test that the client is able to.
     Once authenticated, pass a correctly formatted Mount Header
     """
-    # not ideal, wait for the jhub container to start, update with proper check
-    time.sleep(5)
     client = docker.from_env()
+    service_name = "jupyterhub"
+    if not wait_for_service(client, service_name, minutes=5):
+        raise RuntimeError("The JupyterHub service never emerged")
     containers = client.containers.list()
     assert len(containers) > 0
     with requests.session() as session:
@@ -313,9 +348,10 @@ def test_basic_cert_user_header_auth(build_image, container):
     Test that the client is able to.
     Once authenticated, pass a correctly formatted Mount Header
     """
-    # not ideal, wait for the jhub container to start, update with proper check
-    time.sleep(5)
     client = docker.from_env()
+    service_name = "jupyterhub"
+    if not wait_for_service(client, service_name, minutes=5):
+        raise RuntimeError("The JupyterHub service never emerged")
     containers = client.containers.list()
     assert len(containers) > 0
     session = requests.session()
@@ -357,9 +393,10 @@ def test_json_data_post(build_image, network, container):
     """
     Test that the client is able to submit a json data to the authenticated user.
     """
-    # not ideal, wait for the jhub container to start, update with proper check
-    time.sleep(5)
     client = docker.from_env()
+    service_name = "jupyterhub"
+    if not wait_for_service(client, service_name, minutes=5):
+        raise RuntimeError("The JupyterHub service never emerged")
     containers = client.containers.list()
     assert len(containers) > 0
     session = requests.session()

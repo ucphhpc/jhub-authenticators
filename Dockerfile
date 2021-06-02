@@ -29,5 +29,7 @@ RUN touch README.rst \
 
 RUN pip3 install dockerspawner
 
+WORKDIR /etc/jupyterhub
+
 # Make sure the jupyter_config is mounted upon run
 CMD ["jupyterhub"]

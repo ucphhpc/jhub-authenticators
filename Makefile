@@ -1,4 +1,4 @@
-OWNER=rasmunk
+OWNER=ucphhpc
 IMAGE=jhub-authenticators
 TAG=edge
 

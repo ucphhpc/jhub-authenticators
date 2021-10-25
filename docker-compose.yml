@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   jupyterhub:
-    image: rasmunk/jhub-authenticators:edge
+    image: ucphhpc/jhub-authenticators:edge
     container_name: jupyterhub
     ports:
       - "80:8000/tcp"

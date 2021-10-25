@@ -29,14 +29,14 @@ setup(
     author_email="munk1@live.dk",
     license="GPLv3",
     keywords=["Interactive", "Interpreter", "Shell", "Web"],
-    url="https://github.com/rasmunk/jhub-authenticators",
+    url="https://github.com/ucphhpc/jhub-authenticators",
     packages=find_packages(),
     install_requires=read_req("requirements.txt"),
     extras_require={
         "test": read_req("tests/requirements.txt"),
         "dev": read_req("requirements-dev.txt"),
     },
-    project_urls={"Source Code": "https://github.com/rasmunk/jhub-authenticators"},
+    project_urls={"Source Code": "https://github.com/ucphhpc/jhub-authenticators"},
     classifiers=[
         "Intended Audience :: Developers",
         "Intended Audience :: System Administrators",

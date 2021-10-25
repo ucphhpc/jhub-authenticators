@@ -7,9 +7,11 @@ TAG=edge
 all: clean build
 
 build:
+	python3 setup.py sdist bdist_wheel
 	docker build -t ${OWNER}/${IMAGE}:${TAG} .
 
 clean:
+	rm -fr dist build jhub_authenticators.egg-info
 	docker rmi -f ${OWNER}/${IMAGE}:${TAG}
 
 push:

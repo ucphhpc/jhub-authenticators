@@ -78,7 +78,7 @@ class RemoteUserLoginHandler(BaseHandler):
         user = yield self.get_current_user()
         if user:
             if hasattr(user, "name"):
-                self.log.info("User: {} is already authenticated".format(user.name))
+                self.log.debug("User: {} is already authenticated".format(user.name))
             self.redirect(url_path_join(self.hub.server.base_url, "home"))
         else:
             user_data = extract_headers(self.request, self.authenticator.auth_headers)
@@ -119,7 +119,7 @@ class DataHandler(BaseHandler):
                 self.log.error("User: {} - {}-{}-{}".format(user, d, msg, err))
                 raise web.HTTPError(403, msg)
 
-            self.log.info(
+            self.log.debug(
                 "User: {}-{} Accepted data header: {}".format(
                     user, user.name, evaled_data
                 )
@@ -200,7 +200,7 @@ class DataRemoteUserAuthenticator(RemoteUserAuthenticator):
 
     async def authenticate(self, handler, data):
         if "Remote-User" not in data:
-            self.log.info("A Remote-User header is required")
+            self.log.warn("A Remote-User header is required")
             return None
 
         # Login

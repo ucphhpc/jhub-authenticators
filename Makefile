@@ -17,6 +17,9 @@ clean:
 push:
 	docker push ${OWNER}/${IMAGE}:${TAG}
 
+installtests:
+	pip3 install -r tests/requirements.txt
+
 test:
 	$(MAKE) build
 	pip3 install -r tests/requirements.txt

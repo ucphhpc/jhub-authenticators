@@ -1,26 +1,66 @@
+PACKAGE_NAME=jhub-authenticators
+PACKAGE_NAME_FORMATTED=$(subst -,_,$(PACKAGE_NAME))
 OWNER=ucphhpc
-IMAGE=jhub-authenticators
+IMAGE=$(PACKAGE_NAME)
 TAG=edge
+ARGS=
 
-.PHONY: build
+.PHONY: all init dockerbuild dockerclean dockerpush clean dist distclean maintainer-clean
+.PHONY: install uninstall installcheck check
 
-all: clean build
+all: venv install-dep init dockerbuild
 
-build:
-	python3 setup.py sdist bdist_wheel
-	docker build -t ${OWNER}/${IMAGE}:${TAG} .
+init:
+ifeq ($(shell test -e defaults.env && echo yes), yes)
+ifneq ($(shell test -e .env && echo yes), yes)
+		ln -s defaults.env .env
+endif
+endif
+
+dockerbuild:
+	docker build -t $(OWNER)/$(IMAGE):$(TAG) $(ARGS) .
+
+dockerclean:
+	docker rmi -f $(OWNER)/$(IMAGE):$(TAG)
+
+dockerpush:
+	docker push $(OWNER)/$(IMAGE):$(TAG)
 
 clean:
-	rm -fr dist build jhub_authenticators.egg-info
-	docker rmi -f ${OWNER}/${IMAGE}:${TAG}
+	$(MAKE) dockerclean
+	$(MAKE) distclean
+	$(MAKE) venv-clean
+	rm -fr .env
+	rm -fr .pytest_cache
+	rm -fr tests/__pycache__
 
-push:
-	docker push ${OWNER}/${IMAGE}:${TAG}
+dist:
+	$(VENV)/python setup.py sdist bdist_wheel
 
-installtests:
-	pip3 install -r tests/requirements.txt
+distclean:
+	rm -fr dist build $(PACKAGE_NAME).egg-info $(PACKAGE_NAME_FORMATTED).egg-info
 
-test:
-	$(MAKE) build
-	pip3 install -r tests/requirements.txt
-	pytest -s -v tests/
+maintainer-clean:
+	@echo 'This command is intended for maintainers to use; it'
+	@echo 'deletes files that may need special tools to rebuild.'
+	$(MAKE) distclean
+
+install-dep:
+	$(VENV)/pip install -r requirements.txt
+
+install:
+	$(MAKE) install-dep
+	$(VENV)/pip install .
+
+uninstall:
+	$(VENV)/pip uninstall -y -r requirements.txt
+	$(VENV)/pip uninstall -y -r $(PACKAGE_NAME)
+
+installcheck:
+	$(VENV)/pip install -r tests/requirements.txt
+
+# The tests requires access to the docker socket
+check:
+	. $(VENV)/activate; pytest -s -v tests/
+
+include Makefile.venv

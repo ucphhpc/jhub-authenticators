@@ -1,12 +1,12 @@
 environments:
-  pypi_package:
+  bare_metal_pypi_package:
     environments:
       GIT_USER: "{{SECRET:[github][username]}}"
     pipelines:
       - jhub-authenticators
 pipelines:
   jhub-authenticators:
-    group: pypi_package
+    group: bare_metal_pypi_package
     locking: off
     materials:
       jhub-authenticators_git:  # this is the name of material

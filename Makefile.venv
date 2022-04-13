@@ -73,7 +73,8 @@ endif
 .PHONY: venv
 venv:
 	$(PY) -m venv $(VENV_NAME)
-	$(VENV)/python -m pip install --upgrade pip setuptools wheel twine
+	$(VENV)/python -m pip install --upgrade pip setuptools wheel
+	$(VENV)/python -m pip install twine
 
 .PHONY: venv-clean
 venv-clean:

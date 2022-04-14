@@ -46,7 +46,7 @@ def test_dummy_auth(build_image, container):
     Test that the client is able to.
     - Once authenticated, pass a correctly formatted Mount Header
     """
-    test_logger.info("Start of test dummy auth testing")
+    test_logger.info("Start of test_dummy_auth")
     assert wait_for_site(JHUB_URL) is True
     with requests.Session() as s:
         # login
@@ -63,3 +63,4 @@ def test_dummy_auth(build_image, container):
         assert login_response.status_code == 200
         resp = s.get(JHUB_URL + "/hub/home")
         assert resp.status_code == 200
+    test_logger.info("End of test_dummy_auth")

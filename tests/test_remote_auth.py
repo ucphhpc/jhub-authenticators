@@ -1,14 +1,28 @@
+import os
 import requests
+import logging
 import docker
 import pytest
-import time
 from random import SystemRandom
 from os.path import join, dirname, realpath
 from docker.types import Mount
+from util import (
+    wait_for_site,
+    wait_for_container,
+)
 
 IMAGE_NAME = "jupyterhub"
 IMAGE_TAG = "test"
 IMAGE = "".join([IMAGE_NAME, ":", IMAGE_TAG])
+PORT = 8000
+JHUB_URL = "http://127.0.0.1:{}".format(PORT)
+JHUB_HUB_URL = "{}/hub".format(JHUB_URL)
+
+JUPYTERHUB_START_ERROR = "The JupyterHub service never emerged"
+
+# Logger
+logging.basicConfig(level=logging.INFO)
+test_logger = logging.getLogger()
 
 # root dir
 docker_path = dirname(dirname(realpath(__file__)))
@@ -23,7 +37,7 @@ jhub_image = {"path": docker_path, "tag": IMAGE, "rm": "True", "pull": "True"}
 
 rand_key = "".join(SystemRandom().choice("0123456789abcdef") for _ in range(32))
 
-target_config = "/etc/jupyterhub/jupyterhub_config.py"
+target_config = os.path.join(os.sep, "etc", "jupyterhub", "jupyterhub_config.py")
 # container cmd
 jhub_cont = {
     "image": IMAGE,
@@ -33,9 +47,9 @@ jhub_cont = {
             source=remote_config_path, target=target_config, read_only=True, type="bind"
         )
     ],
-    "ports": {8000: 8000},
+    "ports": {PORT: PORT},
     "detach": "True",
-    "command": ["jupyterhub", "-f", "/etc/jupyterhub/jupyterhub_config.py"],
+    "command": ["jupyterhub", "-f", target_config],
 }
 
 
@@ -47,42 +61,34 @@ def test_auth_hub(build_image, container):
     Not access the home path without being authed
     Authenticate with the Remote-User header
     """
-    # not ideal, wait for the jhub container to start, update with proper check
-    time.sleep(5)
+    test_logger.info("Start of test_auth_hub")
     client = docker.from_env()
-    containers = client.containers.list()
-    assert len(containers) > 0
-    session = requests.session()
+    service_name = "jupyterhub"
+    if not wait_for_container(client, service_name, minutes=5):
+        raise RuntimeError(JUPYTERHUB_START_ERROR)
+    assert wait_for_site(JHUB_URL, valid_status_code=401) is True
 
-    jhub_base_url = "http://127.0.0.1:8000/hub"
-    # wait for jhub to be ready
-    jhub_ready = False
-    while not jhub_ready:
-        resp = session.get("".join([jhub_base_url, "/home"]))
-        if resp.status_code != 404:
-            jhub_ready = True
+    with requests.Session() as session:
+        # Auth requests
+        user_cert = (
+            "/C=DK/ST=NA/L=NA/O=NBI/OU=NA/CN=Name" "/emailAddress=mail@sdfsf.com"
+        )
+        other_user = "idfsf"
 
-    # Not allowed, -> not authed
-    no_auth_response = session.get("".join([jhub_base_url, "/home"]))
-    assert no_auth_response.status_code == 401
+        cert_auth_header = {"Remote-User": user_cert}
 
-    # Auth requests
-    user_cert = "/C=DK/ST=NA/L=NA/O=NBI/OU=NA/CN=Name" "/emailAddress=mail@sdfsf.com"
-    other_user = "idfsf"
+        other_auth_header = {"Remote-User": other_user}
 
-    cert_auth_header = {"Remote-User": user_cert}
+        auth_response = session.post(
+            "".join([JHUB_HUB_URL, "/login"]), headers=cert_auth_header
+        )
+        assert auth_response.status_code == 200
 
-    other_auth_header = {"Remote-User": other_user}
-
-    auth_response = session.post(
-        "".join([jhub_base_url, "/login"]), headers=cert_auth_header
-    )
-    assert auth_response.status_code == 200
-
-    auth_response = session.get(
-        "".join([jhub_base_url, "/home"]), headers=other_auth_header
-    )
-    assert auth_response.status_code == 200
+        auth_response = session.get(
+            "".join([JHUB_HUB_URL, "/home"]), headers=other_auth_header
+        )
+        assert auth_response.status_code == 200
+    test_logger.info("End of test_auth_hub")
 
 
 @pytest.mark.parametrize("build_image", [jhub_image], indirect=["build_image"])
@@ -93,57 +99,53 @@ def test_auth_data_header(build_image, container):
     Once authenticated, pass a correctly formatted custom Data header
     """
     # not ideal, wait for the jhub container to start, update with proper check
-    time.sleep(5)
+    test_logger.info("Start of test_auth_data_header")
     client = docker.from_env()
-    containers = client.containers.list()
-    assert len(containers) > 0
-    session = requests.session()
+    service_name = "jupyterhub"
+    if not wait_for_container(client, service_name, minutes=5):
+        raise RuntimeError(JUPYTERHUB_START_ERROR)
+    assert wait_for_site(JHUB_URL, valid_status_code=401) is True
+    with requests.Session() as session:
+        no_auth_mount = session.post("".join([JHUB_HUB_URL, "/data"]))
+        assert no_auth_mount.status_code == 403
 
-    jhub_base_url = "http://127.0.0.1:8000/hub"
-    # wait for jhub to be ready
-    jhub_ready = False
-    while not jhub_ready:
-        resp = session.get("".join([jhub_base_url, "/home"]))
-        if resp.status_code != 404:
-            jhub_ready = True
+        # Auth requests
+        user_cert = (
+            "/C=DK/ST=NA/L=NA/O=NBI/OU=NA/CN=Name" "/emailAddress=mail@sdfsf.com"
+        )
 
-    no_auth_mount = session.post("".join([jhub_base_url, "/data"]))
-    assert no_auth_mount.status_code == 403
+        cert_auth_header = {"Remote-User": user_cert}
 
-    # Auth requests
-    user_cert = "/C=DK/ST=NA/L=NA/O=NBI/OU=NA/CN=Name" "/emailAddress=mail@sdfsf.com"
+        auth_response = session.get(
+            "".join([JHUB_HUB_URL, "/home"]), headers=cert_auth_header
+        )
+        assert auth_response.status_code == 200
 
-    cert_auth_header = {"Remote-User": user_cert}
+        auth_response = session.post(
+            "".join([JHUB_HUB_URL, "/login"]), headers=cert_auth_header
+        )
+        assert auth_response.status_code == 200
 
-    auth_response = session.get(
-        "".join([jhub_base_url, "/home"]), headers=cert_auth_header
-    )
-    assert auth_response.status_code == 200
+        wrong_header = {"Mount": "SDfssdfsesdfsfdsdfsxv"}
 
-    auth_response = session.post(
-        "".join([jhub_base_url, "/login"]), headers=cert_auth_header
-    )
-    assert auth_response.status_code == 200
+        # Random key set
+        correct_dict = {
+            "HOST": "hostaddr",
+            "USERNAME": "randomstring_unique_string",
+            "PATH": "@host.localhost:",
+        }
 
-    wrong_header = {"Mount": "SDfssdfsesdfsfdsdfsxv"}
+        correct_header = {"Mount": str(correct_dict)}
 
-    # Random key set
-    correct_dict = {
-        "HOST": "hostaddr",
-        "USERNAME": "randomstring_unique_string",
-        "PATH": "@host.localhost:",
-    }
+        # Invalid mount header
+        auth_mount_response = session.post(
+            "".join([JHUB_HUB_URL, "/data"]), headers=wrong_header
+        )
+        assert auth_mount_response.status_code == 403
 
-    correct_header = {"Mount": str(correct_dict)}
-
-    # Invalid mount header
-    auth_mount_response = session.post(
-        "".join([jhub_base_url, "/data"]), headers=wrong_header
-    )
-    assert auth_mount_response.status_code == 403
-
-    # Valid mount header
-    auth_mount_response = session.post(
-        "".join([jhub_base_url, "/data"]), headers=correct_header
-    )
-    assert auth_mount_response.status_code == 200
+        # Valid mount header
+        auth_mount_response = session.post(
+            "".join([JHUB_HUB_URL, "/data"]), headers=correct_header
+        )
+        assert auth_mount_response.status_code == 200
+    test_logger.info("End of test_auth_data_header")

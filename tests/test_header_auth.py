@@ -176,6 +176,7 @@ def test_default_header_config(build_image, container):
             "".join([JHUB_HUB_URL, "/login"]), headers=auth_header
         )
         assert auth_response.status_code == 200
+    test_logger.info("End of test_default_header_config")
 
 
 @pytest.mark.parametrize("build_image", [jhub_image], indirect=["build_image"])
@@ -207,6 +208,7 @@ def test_custom_data_header_auth(build_image, container):
             "".join([JHUB_HUB_URL, "/login"]), headers=auth_data_header
         )
         assert auth_response.status_code == 200
+    test_logger.info("End of test_custom_data_header_auth")
 
 
 @pytest.mark.parametrize("build_image", [jhub_image], indirect=["build_image"])
@@ -291,6 +293,7 @@ def test_auth_state_header_auth(build_image, network, container):
 
         deleted_container = get_container(client, target_container_name)
         assert deleted_container is None
+    test_logger.info("End of test_auth_state_header_auth")
 
 
 @pytest.mark.parametrize("build_image", [jhub_image], indirect=["build_image"])
@@ -320,6 +323,7 @@ def test_remote_oid_user_header_auth(build_image, container):
             "".join([JHUB_HUB_URL, "/login"]), headers=auth_header
         )
         assert auth_response.status_code == 200
+    test_logger.info("End of test_remote_oid_user_header_auth")
 
 
 @pytest.mark.parametrize("build_image", [jhub_image], indirect=["build_image"])
@@ -352,6 +356,7 @@ def test_basic_cert_user_header_auth(build_image, container):
         )
         assert auth_response.status_code == 200
         # TODO, validate username is actual email regex
+    test_logger.info("End of test_basic_cert_user_header_auth")
 
 
 @pytest.mark.parametrize("build_image", [jhub_image], indirect=["build_image"])
@@ -396,3 +401,4 @@ def test_json_data_post(build_image, network, container):
             "".join([JHUB_HUB_URL, "/user-data"]), json=json_data
         )
         assert post_response.status_code == 200
+    test_logger.info("End of test_json_data_post")

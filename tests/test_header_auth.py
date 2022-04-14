@@ -164,7 +164,7 @@ def test_default_header_config(build_image, container):
     assert wait_for_site(JHUB_URL, valid_status_code=401) is True
     with requests.session() as session:
         # Auth requests
-        remote_user = "myusername"
+        remote_user = "my-username-0"
         auth_header = {"Remote-User": remote_user}
 
         auth_response = session.get(
@@ -196,7 +196,7 @@ def test_custom_data_header_auth(build_image, container):
     assert wait_for_site(JHUB_URL, valid_status_code=401) is True
     with requests.session() as session:
         # Auth requests
-        remote_user = "myusername2"
+        remote_user = "my-username-2"
         data_dict = {
             "HOST": "hostaddr",
             "USERNAME": "randomstring_unique_string",
@@ -229,7 +229,7 @@ def test_auth_state_header_auth(build_image, network, container):
     assert wait_for_site(JHUB_URL, valid_status_code=401) is True
     with requests.session() as session:
         # Auth requests
-        remote_user = "myusername3"
+        remote_user = "my-username-3"
         data_str = "blablabla"
         data_dict = {
             "HOST": "hostaddr",

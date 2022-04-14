@@ -1,21 +1,39 @@
 import os
 import requests
+import logging
 import docker
 import pytest
-import time
 import json
 import base64
+from urllib.parse import urljoin
 from os.path import join, dirname, realpath
 from docker.types import Mount
+from util import (
+    wait_for_site,
+    delete,
+    get_container_user,
+    get_container,
+    wait_for_container,
+)
+
 
 IMAGE_NAME = "jupyterhub"
 IMAGE_TAG = "test"
 IMAGE = "".join([IMAGE_NAME, ":", IMAGE_TAG])
+PORT = 8000
+JHUB_URL = "http://127.0.0.1:{}".format(PORT)
+JHUB_HUB_URL = "{}/hub".format(JHUB_URL)
 
-JHUB_URL = "http://127.0.0.1:8000"
+JUPYTERHUB_START_ERROR = "The JupyterHub service never emerged"
+
+# Logger
+logging.basicConfig(level=logging.INFO)
+test_logger = logging.getLogger()
+
 # root dir
 docker_path = dirname(dirname(realpath(__file__)))
 configs_dir_path = join(dirname(realpath(__file__)), "jupyterhub_configs")
+
 # mount paths
 default_config = join(configs_dir_path, "header_default_config.py")
 email_username_config = join(configs_dir_path, "header_email_username_config.py")
@@ -26,7 +44,10 @@ auth_json_data_config = join(configs_dir_path, "header_auth_json_data_config.py"
 # image build
 jhub_image = {"path": docker_path, "tag": IMAGE, "rm": "True", "pull": "True"}
 
-target_config = "/etc/jupyterhub/jupyterhub_config.py"
+target_config = os.path.join(os.sep, "etc", "jupyterhub", "jupyterhub_config.py")
+docker_socket_path = os.path.join(os.sep, "var", "run", "docker.sock")
+
+
 # container cmd
 default_jhub_cont = {
     "image": IMAGE,
@@ -34,9 +55,9 @@ default_jhub_cont = {
     "mounts": [
         Mount(source=default_config, target=target_config, read_only=True, type="bind")
     ],
-    "ports": {8000: 8000},
+    "ports": {PORT: PORT},
     "detach": "True",
-    "command": ["jupyterhub", "-f", "/etc/jupyterhub/jupyterhub_config.py"],
+    "command": ["jupyterhub", "-f", target_config],
 }
 email_jhub_cont = {
     "image": IMAGE,
@@ -49,9 +70,9 @@ email_jhub_cont = {
             type="bind",
         )
     ],
-    "ports": {8000: 8000},
+    "ports": {PORT: PORT},
     "detach": "True",
-    "command": ["jupyterhub", "-f", "/etc/jupyterhub/jupyterhub_config.py"],
+    "command": ["jupyterhub", "-f", target_config],
 }
 custom_data_header_jhub_cont = {
     "image": IMAGE,
@@ -64,9 +85,9 @@ custom_data_header_jhub_cont = {
             type="bind",
         )
     ],
-    "ports": {8000: 8000},
+    "ports": {PORT: PORT},
     "detach": "True",
-    "command": ["jupyterhub", "-f", "/etc/jupyterhub/jupyterhub_config.py"],
+    "command": ["jupyterhub", "-f", target_config],
 }
 AUTH_STATE_NETWORK_NAME = "jhub_auth_state_network"
 auth_state_network_config = {
@@ -85,17 +106,17 @@ auth_state_data_header_jhub_cont = {
             type="bind",
         ),
         Mount(
-            source="/var/run/docker.sock",
-            target="/var/run/docker.sock",
+            source=docker_socket_path,
+            target=docker_socket_path,
             read_only=True,
             type="bind",
         ),
     ],
-    "ports": {8000: 8000},
+    "ports": {PORT: PORT},
     "detach": "True",
     "environment": {"JUPYTERHUB_CRYPT_KEY": base64.b64encode(os.urandom(32))},
     "network": AUTH_STATE_NETWORK_NAME,
-    "command": ["jupyterhub", "--debug", "-f", "/etc/jupyterhub/jupyterhub_config.py"],
+    "command": ["jupyterhub", "--debug", "-f", target_config],
 }
 AUTH_JSON_DATA_NETWORK_NAME = "jhub_auth_json_network"
 auth_json_data_network_config = {
@@ -114,45 +135,18 @@ auth_state_json_data_jhub_cont = {
             type="bind",
         ),
         Mount(
-            source="/var/run/docker.sock",
-            target="/var/run/docker.sock",
+            source=docker_socket_path,
+            target=docker_socket_path,
             read_only=True,
             type="bind",
         ),
     ],
-    "ports": {8000: 8000},
+    "ports": {PORT: PORT},
     "detach": "True",
     "environment": {"JUPYTERHUB_CRYPT_KEY": base64.b64encode(os.urandom(32))},
     "network": AUTH_JSON_DATA_NETWORK_NAME,
-    "command": ["jupyterhub", "-f", "/etc/jupyterhub/jupyterhub_config.py"],
+    "command": ["jupyterhub", "-f", target_config],
 }
-
-
-def wait_for_service(client, service_name, minutes=5):
-    found = False
-    sec_waited = 0
-    sleep_for = 20
-    while not found:
-        containers = get_containers(client, service_name)
-        if len(containers) > 0:
-            found = True
-
-        time.sleep(sleep_for)
-        sec_waited += sleep_for
-        if sec_waited > (minutes * 60):
-            break
-
-    return found
-
-
-def get_containers(client, service_name):
-    post_spawn_containers = client.containers.list()
-    found_containers = [
-        container
-        for container in post_spawn_containers
-        if service_name in container.name
-    ]
-    return found_containers
 
 
 @pytest.mark.parametrize("build_image", [jhub_image], indirect=["build_image"])
@@ -162,32 +156,24 @@ def test_default_header_config(build_image, container):
     Test that an authenticated client is able to pass
      a correctly formatted Mount Header
     """
+    test_logger.info("Start of test_default_header_config")
     client = docker.from_env()
     service_name = "jupyterhub"
-    if not wait_for_service(client, service_name, minutes=5):
-        raise RuntimeError("The JupyterHub service never emerged")
-    containers = client.containers.list()
-    assert len(containers) > 0
+    if not wait_for_container(client, service_name, minutes=5):
+        raise RuntimeError(JUPYTERHUB_START_ERROR)
+    assert wait_for_site(JHUB_URL, valid_status_code=401) is True
     with requests.session() as session:
-        jhub_base_url = "http://127.0.0.1:8000/hub"
-        # wait for jhub to be ready
-        jhub_ready = False
-        while not jhub_ready:
-            resp = session.get("".join([jhub_base_url, "/home"]))
-            if resp.status_code != 404:
-                jhub_ready = True
-
         # Auth requests
         remote_user = "myusername"
         auth_header = {"Remote-User": remote_user}
 
         auth_response = session.get(
-            "".join([jhub_base_url, "/home"]), headers=auth_header
+            "".join([JHUB_HUB_URL, "/home"]), headers=auth_header
         )
         assert auth_response.status_code == 200
 
         auth_response = session.post(
-            "".join([jhub_base_url, "/login"]), headers=auth_header
+            "".join([JHUB_HUB_URL, "/login"]), headers=auth_header
         )
         assert auth_response.status_code == 200
 
@@ -201,21 +187,13 @@ def test_custom_data_header_auth(build_image, container):
     Test that the client is able to.
     Once authenticated, pass a correctly formatted Mount Header
     """
+    test_logger.info("Start of test_custom_data_header_auth")
     client = docker.from_env()
     service_name = "jupyterhub"
-    if not wait_for_service(client, service_name, minutes=5):
-        raise RuntimeError("The JupyterHub service never emerged")
-    containers = client.containers.list()
-    assert len(containers) > 0
+    if not wait_for_container(client, service_name, minutes=5):
+        raise RuntimeError(JUPYTERHUB_START_ERROR)
+    assert wait_for_site(JHUB_URL, valid_status_code=401) is True
     with requests.session() as session:
-        jhub_base_url = "http://127.0.0.1:8000/hub"
-        # wait for jhub to be ready
-        jhub_ready = False
-        while not jhub_ready:
-            resp = session.get("".join([jhub_base_url, "/home"]))
-            if resp.status_code != 404:
-                jhub_ready = True
-
         # Auth requests
         remote_user = "myusername2"
         data_dict = {
@@ -226,7 +204,7 @@ def test_custom_data_header_auth(build_image, container):
         auth_data_header = {"Remote-User": remote_user, "Mount": json.dumps(data_dict)}
 
         auth_response = session.post(
-            "".join([jhub_base_url, "/login"]), headers=auth_data_header
+            "".join([JHUB_HUB_URL, "/login"]), headers=auth_data_header
         )
         assert auth_response.status_code == 200
 
@@ -241,21 +219,13 @@ def test_auth_state_header_auth(build_image, network, container):
     Test that the client is able to. Test that auth_state recieves
     the specified test data headers.
     """
+    test_logger.info("Start of test_auth_state_header_auth")
     client = docker.from_env()
     service_name = "jupyterhub"
-    if not wait_for_service(client, service_name, minutes=5):
-        raise RuntimeError("The JupyterHub service never emerged")
-    containers = client.containers.list()
-    assert len(containers) > 0
+    if not wait_for_container(client, service_name, minutes=5):
+        raise RuntimeError(JUPYTERHUB_START_ERROR)
+    assert wait_for_site(JHUB_URL, valid_status_code=401) is True
     with requests.session() as session:
-        jhub_base_url = "http://127.0.0.1:8000/hub"
-        # wait for jhub to be ready
-        jhub_ready = False
-        while not jhub_ready:
-            resp = session.get("".join([jhub_base_url, "/home"]))
-            if resp.status_code != 404:
-                jhub_ready = True
-
         # Auth requests
         remote_user = "myusername3"
         data_str = "blablabla"
@@ -274,34 +244,53 @@ def test_auth_state_header_auth(build_image, network, container):
             {env_key: json.dumps(env_val) for env_key, env_val in env_data.items()}
         )
         auth_response = session.post(
-            "".join([jhub_base_url, "/login"]), headers=auth_data_header
+            "".join([JHUB_HUB_URL, "/login"]), headers=auth_data_header
         )
         assert auth_response.status_code == 200
         # Spawn with auth_state
-        spawn_response = session.post("".join([jhub_base_url, "/spawn"]))
+        spawn_response = session.post("".join([JHUB_HUB_URL, "/spawn"]))
         assert spawn_response.status_code == 200
-        # Wait for 3 minutes
-        service_name = "jupyter-"
+
+        test_logger.info("Spawn POST response message: {}".format(spawn_response.text))
+        assert spawn_response.status_code == 200
+
+        target_container_name = "{}-{}".format("jupyter", remote_user)
         wait_min = 5
-        if not wait_for_service(client, service_name, minutes=wait_min):
+        if not wait_for_container(client, target_container_name, minutes=wait_min):
             raise RuntimeError(
-                "No service with name: {} appeared within: {} minutes".format(
+                "No container with name: {} appeared within: {} minutes".format(
                     service_name, wait_min
                 )
             )
 
-        jupyter_containers = get_containers(client, service_name)
-        assert len(jupyter_containers) > 0
+        spawned_container = get_container(client, target_container_name)
+        # Validate that the container has the passed environment values defined
+        # in env_data
+        envs = {
+            env.split("=")[0]: env.split("=")[1]
+            for env in spawned_container.attrs["Config"]["Env"]
+        }
+        for data_key, data_value in env_data.items():
+            assert data_key in envs
+            assert envs[data_key] == str(data_value)
 
-        # Check container for passed environments
-        for container in jupyter_containers:
-            envs = {
-                env.split("=")[0]: env.split("=")[1]
-                for env in container.attrs["Config"]["Env"]
-            }
-            for data_key, data_value in env_data.items():
-                assert data_key in envs
-                assert envs[data_key] == str(data_value)
+        # Shutdown the container
+        # Delete the spawned service
+        delete_headers = {"Referer": urljoin(JHUB_URL, "/hub/"), "Origin": JHUB_URL}
+
+        jhub_user = get_container_user(spawned_container)
+        assert jhub_user is not None
+        delete_url = urljoin(JHUB_URL, "/hub/api/users/{}/server".format(jhub_user))
+
+        deleted = delete(session, delete_url, headers=delete_headers)
+        assert deleted
+        # Remove the stopped container
+        spawned_container.stop()
+        spawned_container.wait()
+        spawned_container.remove()
+
+        deleted_container = get_container(client, target_container_name)
+        assert deleted_container is None
 
 
 @pytest.mark.parametrize("build_image", [jhub_image], indirect=["build_image"])
@@ -311,32 +300,24 @@ def test_remote_oid_user_header_auth(build_image, container):
     Test that the client is able to.
     Once authenticated, pass a correctly formatted Mount Header
     """
+    test_logger.info("Start of test_remote_oid_user_header_auth")
     client = docker.from_env()
     service_name = "jupyterhub"
-    if not wait_for_service(client, service_name, minutes=5):
-        raise RuntimeError("The JupyterHub service never emerged")
-    containers = client.containers.list()
-    assert len(containers) > 0
+    if not wait_for_container(client, service_name, minutes=5):
+        raise RuntimeError(JUPYTERHUB_START_ERROR)
+    assert wait_for_site(JHUB_URL, valid_status_code=401) is True
     with requests.session() as session:
-        jhub_base_url = "http://127.0.0.1:8000/hub"
-        # wait for jhub to be ready
-        jhub_ready = False
-        while not jhub_ready:
-            resp = session.get("".join([jhub_base_url, "/home"]))
-            if resp.status_code != 404:
-                jhub_ready = True
-
         # Auth requests
         remote_user = "https://oid.migrid.test/openid/id/fballam0@auda.org.au"
         auth_header = {"Remote-User": remote_user}
 
         auth_response = session.get(
-            "".join([jhub_base_url, "/home"]), headers=auth_header
+            "".join([JHUB_HUB_URL, "/home"]), headers=auth_header
         )
         assert auth_response.status_code == 200
 
         auth_response = session.post(
-            "".join([jhub_base_url, "/login"]), headers=auth_header
+            "".join([JHUB_HUB_URL, "/login"]), headers=auth_header
         )
         assert auth_response.status_code == 200
 
@@ -348,22 +329,13 @@ def test_basic_cert_user_header_auth(build_image, container):
     Test that the client is able to.
     Once authenticated, pass a correctly formatted Mount Header
     """
+    test_logger.info("Start of test_basic_cert_user_header_auth")
     client = docker.from_env()
     service_name = "jupyterhub"
-    if not wait_for_service(client, service_name, minutes=5):
-        raise RuntimeError("The JupyterHub service never emerged")
-    containers = client.containers.list()
-    assert len(containers) > 0
-    session = requests.session()
+    if not wait_for_container(client, service_name, minutes=5):
+        raise RuntimeError(JUPYTERHUB_START_ERROR)
+    assert wait_for_site(JHUB_URL, valid_status_code=401) is True
     with requests.session() as session:
-        jhub_base_url = "http://127.0.0.1:8000/hub"
-        # wait for jhub to be ready
-        jhub_ready = False
-        while not jhub_ready:
-            resp = session.get("".join([jhub_base_url, "/home"]))
-            if resp.status_code != 404:
-                jhub_ready = True
-
         # Auth requests
         remote_user = (
             "/C=DK/ST=NA/L=NA/O=NBI/OU=NA/CN=Name" "/emailAddress=mail@sdfsf.com"
@@ -371,12 +343,12 @@ def test_basic_cert_user_header_auth(build_image, container):
         auth_header = {"Remote-User": remote_user}
 
         auth_response = session.get(
-            "".join([jhub_base_url, "/home"]), headers=auth_header
+            "".join([JHUB_HUB_URL, "/home"]), headers=auth_header
         )
         assert auth_response.status_code == 200
 
         auth_response = session.post(
-            "".join([jhub_base_url, "/login"]), headers=auth_header
+            "".join([JHUB_HUB_URL, "/login"]), headers=auth_header
         )
         assert auth_response.status_code == 200
         # TODO, validate username is actual email regex
@@ -393,22 +365,13 @@ def test_json_data_post(build_image, network, container):
     """
     Test that the client is able to submit a json data to the authenticated user.
     """
+    test_logger.info("Start of test_json_data_post")
     client = docker.from_env()
     service_name = "jupyterhub"
-    if not wait_for_service(client, service_name, minutes=5):
-        raise RuntimeError("The JupyterHub service never emerged")
-    containers = client.containers.list()
-    assert len(containers) > 0
-    session = requests.session()
+    if not wait_for_container(client, service_name, minutes=5):
+        raise RuntimeError(JUPYTERHUB_START_ERROR)
+    assert wait_for_site(JHUB_URL, valid_status_code=401) is True
     with requests.session() as session:
-        jhub_base_url = "http://127.0.0.1:8000/hub"
-        # wait for jhub to be ready
-        jhub_ready = False
-        while not jhub_ready:
-            resp = session.get("".join([jhub_base_url, "/home"]))
-            if resp.status_code != 404:
-                jhub_ready = True
-
         # Auth requests
         remote_user = "new_user"
         auth_header = {
@@ -416,7 +379,7 @@ def test_json_data_post(build_image, network, container):
         }
 
         auth_response = session.post(
-            "".join([jhub_base_url, "/login"]), headers=auth_header
+            "".join([JHUB_HUB_URL, "/login"]), headers=auth_header
         )
         assert auth_response.status_code == 200
         # Post json
@@ -430,6 +393,6 @@ def test_json_data_post(build_image, network, container):
 
         json_data = {"data": env_data}
         post_response = session.post(
-            "".join([jhub_base_url, "/user-data"]), json=json_data
+            "".join([JHUB_HUB_URL, "/user-data"]), json=json_data
         )
         assert post_response.status_code == 200

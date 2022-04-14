@@ -1,17 +1,22 @@
 import requests
-import docker
+import logging
 import pytest
-import time
 from os.path import join, dirname, realpath
 from docker.types import Mount
+from util import wait_for_site
 
 IMAGE_NAME = "jupyterhub"
 IMAGE_TAG = "test"
 IMAGE = "".join([IMAGE_NAME, ":", IMAGE_TAG])
+PORT = 8000
+JHUB_URL = "http://127.0.0.1:{}".format(PORT)
 
-JHUB_URL = "http://127.0.0.1:8000"
 # root dir
 docker_path = dirname(dirname(realpath(__file__)))
+
+# Logger
+logging.basicConfig(level=logging.INFO)
+test_logger = logging.getLogger()
 
 # mount paths
 config_path = join(
@@ -29,7 +34,7 @@ jhub_cont = {
     "mounts": [
         Mount(source=config_path, target=target_config, read_only=True, type="bind")
     ],
-    "ports": {8000: 8000},
+    "ports": {PORT: PORT},
     "detach": "True",
 }
 
@@ -41,22 +46,9 @@ def test_dummy_auth(build_image, container):
     Test that the client is able to.
     - Once authenticated, pass a correctly formatted Mount Header
     """
-    # not ideal, wait for the jhub container to start, update with proper check
-    time.sleep(5)
-    client = docker.from_env()
-    containers = client.containers.list()
-    assert len(containers) > 0
-
+    test_logger.info("Start of test dummy auth testing")
+    assert wait_for_site(JHUB_URL) is True
     with requests.Session() as s:
-        ready = False
-        while not ready:
-            try:
-                s.get(JHUB_URL)
-                if s.get(JHUB_URL + "/hub/login").status_code == 200:
-                    ready = True
-            except requests.exceptions.ConnectionError:
-                pass
-
         # login
         user = "a-new-user"
         # next to hub/home, else the login by

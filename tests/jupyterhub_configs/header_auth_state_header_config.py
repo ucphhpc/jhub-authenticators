@@ -10,7 +10,7 @@ c.DockerSpawner.image = "jupyter/base-notebook:latest"
 c.DockerSpawner.network_name = "jhub_auth_state_network"
 # Due a change in how the DockerSpawner escapes usernames in >=12.0.0
 # https://jupyterhub-dockerspawner.readthedocs.io/en/latest/changelog.html#id1
-# The - character is the new escape character, meaning that the 
+# The - character is the new escape character, meaning that the
 # usage of the - character will be automatically escaped by the escape string '-d2'
 c.DockerSpawner.escape = "legacy"
 

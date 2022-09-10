@@ -1,1 +1,1 @@
-jupyterhub>=2.2.2
+jupyterhub>=3.*

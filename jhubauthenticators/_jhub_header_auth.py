@@ -101,7 +101,7 @@ class HeaderAuthenticator(Authenticator):
             raise web.HTTPError(
                 401,
                 "Authentication failed, "
-                "missing information to authenticate you with",
+                "missing information to authenticate you with.",
             )
 
         user = {"name": user_data.pop(self.allowed_headers["auth"], None)}

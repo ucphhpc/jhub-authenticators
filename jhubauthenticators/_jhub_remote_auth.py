@@ -3,7 +3,7 @@ from base64 import b32encode, b32decode
 from jupyterhub.handlers import BaseHandler
 from jupyterhub.auth import Authenticator
 from jupyterhub.auth import LocalAuthenticator
-from jupyterhub.utils import url_path_join
+from jupyterhub.utils import url_path_join, maybe_future
 from tornado import gen, web
 from traitlets import Unicode, List
 from ast import literal_eval
@@ -63,19 +63,21 @@ class PartialBaseURLHandler(BaseHandler):
 
 
 class RemoteUserLogoutHandler(BaseHandler):
-    @gen.coroutine
-    def get(self):
-        user = yield self.get_current_user()
+
+    async def get(self):
+        user = await self.get_current_user()
         if user:
             self.clear_login_cookie()
         self.redirect(self.hub.server.base_url)
 
 
 class RemoteUserLoginHandler(BaseHandler):
-    @gen.coroutine
-    def prepare(self):
+
+    async def prepare(self):
         """login user"""
-        user = yield self.get_current_user()
+        await maybe_future(super().prepare())
+
+        user = self.current_user
         if user:
             if hasattr(user, "name"):
                 self.log.debug("User: {} is already authenticated".format(user.name))
@@ -84,7 +86,7 @@ class RemoteUserLoginHandler(BaseHandler):
             user_data = extract_headers(self.request, self.authenticator.auth_headers)
             if "Remote-User" not in user_data:
                 raise web.HTTPError(401, "You are not Authenticated to do this")
-            yield self.login_user(user_data)
+            await self.login_user(user_data)
 
             argument = self.get_argument("next", None, True)
             if argument is not None:
@@ -102,14 +104,13 @@ class DataHandler(BaseHandler):
     """
 
     @web.authenticated
-    @gen.coroutine
-    def post(self):
+    async def post(self):
         user_data = extract_headers(self.request, self.authenticator.data_headers)
         if not user_data:
             raise web.HTTPError(403, "No valid data header was received")
 
         self.log.debug("Prepared user_data dict: {}".format(user_data))
-        user = yield self.get_current_user()
+        user = await self.get_current_user()
         for k, d in user_data.items():
             # Try to parse the passed information into a valid dtype
             try:

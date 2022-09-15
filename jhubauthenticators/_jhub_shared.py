@@ -4,7 +4,7 @@ from re import search
 from tornado import gen, web
 from tornado.escape import json_decode
 from jupyterhub.handlers import BaseHandler
-from jupyterhub.utils import url_path_join
+from jupyterhub.utils import url_path_join, maybe_future
 from traitlets import CRegExp, Dict
 from traitlets.config import LoggingConfigurable
 
@@ -14,11 +14,12 @@ class HeaderLoginHandler(BaseHandler):
     Class that is used to handle whether the user is authenticated or not
     """
 
-    @gen.coroutine
-    def prepare(self):
+    async def prepare(self):
         """Checks whether the user is authenticated, if so
         the user is redirected to / hub.server.base_url / home"""
-        user = yield self.get_current_user()
+        await maybe_future(super().prepare())
+
+        user = self.current_user
         if user:
             if hasattr(user, "name"):
                 self.log.info("User: {} is already authenticated".format(user.name))
@@ -32,7 +33,7 @@ class HeaderLoginHandler(BaseHandler):
             # You need to authenticate first
             headers = self.request.headers
             # Authenticate user
-            user = yield self.login_user(headers)
+            user = await self.login_user(headers)
             if not user:
                 raise web.HTTPError(
                     401,
@@ -55,9 +56,8 @@ class UserDataHandler(BaseHandler):
     """
 
     @web.authenticated
-    @gen.coroutine
-    def post(self):
-        user = yield self.get_current_user()
+    async def post(self):
+        user = await self.get_current_user()
         self.log.debug(
             "UserDataHandler - Request: {}, "
             "Body: {}".format(self.request, self.request.body)

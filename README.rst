@@ -99,7 +99,7 @@ By default, it exposes the following paths::
 
     '/login' -> is utilizied to authenticate the user, relies on the 'allowed_headers' parameter to accomplish this.
     '/logout' -> clears the users authenticated session.
-    '/user-data' -> allows an authenticated user to provide data to be persisted during the authenticated session. Controlled via 'user_external_allow_attributes' parameter.
+    '/user-data' -> allows an authenticated user to provide data to be persisted during the authenticated session. The 'user_external_allow_attributes' parameter defines which attributes are allowed
 
 Specify Authentication Header
 -----------------------------
@@ -190,12 +190,12 @@ Set User state after Authentication
 -----------------------------------
 
 Finally, the HeaderAuthenticator also provides the administrator the possibility to define the ``user_external_allow_attributes`` parameter.
-This allows defines which user attributes an authenticated user is allowed to set the ``user.data`` variable via the ``/user-data`` URL, E.g::
+This allows defines which user attributes an authenticated user is allowed to set a user-defined variable via the HeaderAuthenticator defined `/user-data` endpoint.
+For instance, an authentiacated user's variable `data` could be allowed to be externally defined by defining the following configuration::
 
     c.HeaderAuthenticator.user_external_allow_attributes = ['data']
 
 By default the ``user_external_allow_attributes`` allows no such attributes and has to be explicitly enabled/defined.
-In addition, any posted value to the ``/user-data`` path
-The provided data on this URL, has to be decodable as JSON or it will fail.
+Furthermore, this will only allow an authenticated user to externally define their own `data` instance variable.
 
-Additional configuration examples can be found in the ``tests/jupyterhub_configs`` directory.
+Additional configuration examples of this can be found in the ``tests/jupyterhub_configs`` directory.

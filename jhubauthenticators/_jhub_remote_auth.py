@@ -75,6 +75,8 @@ class RemoteUserLoginHandler(BaseHandler):
 
     async def prepare(self):
         """login user"""
+        # Ensure that the underlying BaseHandler sets up the JupyterHub
+        # state
         await maybe_future(super().prepare())
 
         user = self.current_user

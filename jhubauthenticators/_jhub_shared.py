@@ -17,6 +17,8 @@ class HeaderLoginHandler(BaseHandler):
     async def prepare(self):
         """Checks whether the user is authenticated, if so
         the user is redirected to / hub.server.base_url / home"""
+        # Ensure that the underlying BaseHandler sets up the JupyterHub
+        # state
         await maybe_future(super().prepare())
 
         user = self.current_user

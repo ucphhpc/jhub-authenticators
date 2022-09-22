@@ -99,7 +99,7 @@ By default, it exposes the following paths::
 
     '/login' -> is utilizied to authenticate the user, relies on the 'allowed_headers' parameter to accomplish this.
     '/logout' -> clears the users authenticated session.
-    '/user-data' -> allows an authenticated user to provide data to be persisted during the authenticated session. The 'user_external_allow_attributes' parameter defines which attributes are allowed
+    '/set-user-data' -> allows an authenticated user to provide data to be persisted during the authenticated session. Here the 'user_external_allow_attributes' parameter defines which user attributes are allowed to be set.
 
 Specify Authentication Header
 -----------------------------
@@ -190,7 +190,7 @@ Set User state after Authentication
 -----------------------------------
 
 Finally, the HeaderAuthenticator also provides the administrator the possibility to define the ``user_external_allow_attributes`` parameter.
-This allows defines which user attributes an authenticated user is allowed to set a user-defined variable via the HeaderAuthenticator defined `/user-data` endpoint.
+This allows defines which user attributes an authenticated user is allowed to set a user-defined variable via the HeaderAuthenticator defined `/set-user-data` endpoint.
 For instance, an authentiacated user's variable `data` could be allowed to be externally defined by defining the following configuration::
 
     c.HeaderAuthenticator.user_external_allow_attributes = ['data']

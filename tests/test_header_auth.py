@@ -398,7 +398,7 @@ def test_json_data_post(build_image, network, container):
 
         json_data = {"data": env_data}
         post_response = session.post(
-            "".join([JHUB_HUB_URL, "/user-data"]), json=json_data
+            "".join([JHUB_HUB_URL, "/set-user-data"]), json=json_data
         )
         assert post_response.status_code == 200
     test_logger.info("End of test_json_data_post")

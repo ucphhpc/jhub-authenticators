@@ -50,7 +50,7 @@ class HeaderAuthenticator(Authenticator):
         traits=[Unicode()],
         allow_none=True,
         help="""List of user attributes that are allowed to be defined externally
-         via a JSON post request. Submit via /user-data
+         via a JSON post request. Submit via /set-user-data
         """,
     ).tag(config=True)
 
@@ -67,7 +67,7 @@ class HeaderAuthenticator(Authenticator):
         return [
             (r"/login", HeaderLoginHandler),
             (r"/logout", LogoutHandler),
-            (r"/user-data", UserDataHandler),
+            (r"/set-user-data", UserDataHandler),
         ]
 
     async def authenticate(self, handler, data):

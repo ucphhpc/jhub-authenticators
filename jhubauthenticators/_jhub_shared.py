@@ -1,7 +1,7 @@
 import json
 from json import JSONDecodeError
 from re import search
-from tornado import gen, web
+from tornado import web
 from tornado.escape import json_decode
 from jupyterhub.handlers import BaseHandler
 from jupyterhub.utils import url_path_join, maybe_future

@@ -63,7 +63,6 @@ class PartialBaseURLHandler(BaseHandler):
 
 
 class RemoteUserLogoutHandler(BaseHandler):
-
     async def get(self):
         user = await self.get_current_user()
         if user:
@@ -72,7 +71,6 @@ class RemoteUserLogoutHandler(BaseHandler):
 
 
 class RemoteUserLoginHandler(BaseHandler):
-
     async def prepare(self):
         """login user"""
         # Ensure that the underlying BaseHandler sets up the JupyterHub

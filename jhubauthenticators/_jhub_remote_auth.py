@@ -1,5 +1,5 @@
 from jupyterhub.handlers import BaseHandler
-from jupyterhub.utils import url_path_join, maybe_future
+from jupyterhub.utils import url_path_join
 from tornado import gen, web
 from ast import literal_eval
 

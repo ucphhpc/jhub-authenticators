@@ -10,4 +10,4 @@ c.HeaderAuthenticator.header_parser_classes = {"auth": RegexUsernameParser}
 RegexUsernameParser.username_extract_regex = (
     "([a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)"
 )
-RegexUsernameParser.replace_extract_chars = {"@": "."}
+RegexUsernameParser.replace_extract_chars = {"@": "_", ".": "_"}

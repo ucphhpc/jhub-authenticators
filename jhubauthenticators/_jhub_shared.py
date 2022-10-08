@@ -141,8 +141,8 @@ class RegexUsernameParser(Parser):
         help="""Dict of 'key' identified character(s) in the regex extract result that
         should be replaced with 'value' character(s).
 
-        E.g: replace every '@' with a '.'
-        replace_extract_chars = {'@': '.'}
+        E.g: replace every '@' with a '_'
+        replace_extract_chars = {'@': '_'}
         """,
     ).tag(config=True)
 

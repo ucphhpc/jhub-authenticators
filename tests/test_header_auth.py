@@ -166,14 +166,20 @@ def test_default_header_config(build_image, container):
         # Auth requests
         remote_user = "my-username-0"
         auth_header = {"Remote-User": remote_user}
+        # Refresh cookies
+        session.get(JHUB_HUB_URL)
 
         auth_response = session.get(
-            "".join([JHUB_HUB_URL, "/home"]), headers=auth_header
+            "".join([JHUB_HUB_URL, "/home"]),
+            data={'_xsrf': session.cookies['_xsrf']},
+            headers=auth_header
         )
         assert auth_response.status_code == 200
 
         auth_response = session.post(
-            "".join([JHUB_HUB_URL, "/login"]), headers=auth_header
+            "".join([JHUB_HUB_URL, "/login"]),
+            data={'_xsrf': session.cookies['_xsrf']},
+            headers=auth_header
         )
         assert auth_response.status_code == 200
     test_logger.info("End of test_default_header_config")
@@ -195,6 +201,9 @@ def test_custom_data_header_auth(build_image, container):
         raise RuntimeError(JUPYTERHUB_START_ERROR)
     assert wait_for_site(JHUB_URL, valid_status_code=401) is True
     with requests.session() as session:
+        # Refresh cookies
+        session.get(JHUB_URL)
+
         # Auth requests
         remote_user = "my-username-2"
         data_dict = {
@@ -205,7 +214,9 @@ def test_custom_data_header_auth(build_image, container):
         auth_data_header = {"Remote-User": remote_user, "Mount": json.dumps(data_dict)}
 
         auth_response = session.post(
-            "".join([JHUB_HUB_URL, "/login"]), headers=auth_data_header
+            "".join([JHUB_HUB_URL, "/login"]),
+            data={'_xsrf': session.cookies['_xsrf']},
+            headers=auth_data_header
         )
         assert auth_response.status_code == 200
     test_logger.info("End of test_custom_data_header_auth")
@@ -228,6 +239,9 @@ def test_auth_state_header_auth(build_image, network, container):
         raise RuntimeError(JUPYTERHUB_START_ERROR)
     assert wait_for_site(JHUB_URL, valid_status_code=401) is True
     with requests.session() as session:
+        # Refresh cookies
+        session.get(JHUB_URL)
+
         # Auth requests
         remote_user = "my-username-3"
         data_str = "blablabla"
@@ -246,11 +260,14 @@ def test_auth_state_header_auth(build_image, network, container):
             {env_key: json.dumps(env_val) for env_key, env_val in env_data.items()}
         )
         auth_response = session.post(
-            "".join([JHUB_HUB_URL, "/login"]), headers=auth_data_header
+            "".join([JHUB_HUB_URL, "/login"]),
+            data={'_xsrf': session.cookies['_xsrf']},
+            headers=auth_data_header
         )
         assert auth_response.status_code == 200
         # Spawn with auth_state
-        spawn_response = session.post("".join([JHUB_HUB_URL, "/spawn"]))
+        spawn_response = session.post("".join([JHUB_HUB_URL, "/spawn"]),
+                    data={'_xsrf': session.cookies['_xsrf']})
         assert spawn_response.status_code == 200
 
         test_logger.info("Spawn POST response message: {}".format(spawn_response.text))
@@ -278,13 +295,11 @@ def test_auth_state_header_auth(build_image, network, container):
 
         # Shutdown the container
         # Delete the spawned service
-        delete_headers = {"Referer": urljoin(JHUB_URL, "/hub/"), "Origin": JHUB_URL}
-
         jhub_user = get_container_user(spawned_container)
         assert jhub_user is not None
         delete_url = urljoin(JHUB_URL, "/hub/api/users/{}/server".format(jhub_user))
 
-        deleted = delete(session, delete_url, headers=delete_headers)
+        deleted = delete(session, delete_url)
         assert deleted
         # Remove the stopped container
         spawned_container.stop()
@@ -310,17 +325,23 @@ def test_remote_oid_user_header_auth(build_image, container):
         raise RuntimeError(JUPYTERHUB_START_ERROR)
     assert wait_for_site(JHUB_URL, valid_status_code=401) is True
     with requests.session() as session:
+        # Refresh cookies
+        session.get(JHUB_URL)
         # Auth requests
         remote_user = "https://oid.migrid.test/openid/id/fballam0@auda.org.au"
         auth_header = {"Remote-User": remote_user}
 
         auth_response = session.get(
-            "".join([JHUB_HUB_URL, "/home"]), headers=auth_header
+            "".join([JHUB_HUB_URL, "/home"]),
+            data={'_xsrf': session.cookies['_xsrf']},
+            headers=auth_header
         )
         assert auth_response.status_code == 200
 
         auth_response = session.post(
-            "".join([JHUB_HUB_URL, "/login"]), headers=auth_header
+            "".join([JHUB_HUB_URL, "/login"]),
+            data={'_xsrf': session.cookies['_xsrf']},
+            headers=auth_header
         )
         assert auth_response.status_code == 200
     test_logger.info("End of test_remote_oid_user_header_auth")
@@ -340,6 +361,8 @@ def test_basic_cert_user_header_auth(build_image, container):
         raise RuntimeError(JUPYTERHUB_START_ERROR)
     assert wait_for_site(JHUB_URL, valid_status_code=401) is True
     with requests.session() as session:
+        # Refresh cookies
+        session.get(JHUB_URL)
         # Auth requests
         remote_user = (
             "/C=DK/ST=NA/L=NA/O=NBI/OU=NA/CN=Name" "/emailAddress=mail@sdfsf.com"
@@ -352,7 +375,9 @@ def test_basic_cert_user_header_auth(build_image, container):
         assert auth_response.status_code == 200
 
         auth_response = session.post(
-            "".join([JHUB_HUB_URL, "/login"]), headers=auth_header
+            "".join([JHUB_HUB_URL, "/login"]),
+            data={'_xsrf': session.cookies['_xsrf']},
+            headers=auth_header
         )
         assert auth_response.status_code == 200
         # TODO, validate username is actual email regex
@@ -377,6 +402,8 @@ def test_json_data_post(build_image, network, container):
         raise RuntimeError(JUPYTERHUB_START_ERROR)
     assert wait_for_site(JHUB_URL, valid_status_code=401) is True
     with requests.session() as session:
+        # Refresh cookies
+        session.get(JHUB_URL)
         # Auth requests
         remote_user = "new_user"
         auth_header = {
@@ -384,7 +411,9 @@ def test_json_data_post(build_image, network, container):
         }
 
         auth_response = session.post(
-            "".join([JHUB_HUB_URL, "/login"]), headers=auth_header
+            "".join([JHUB_HUB_URL, "/login"]),
+            data={'_xsrf': session.cookies['_xsrf']},
+            headers=auth_header
         )
         assert auth_response.status_code == 200
         # Post json
@@ -398,7 +427,9 @@ def test_json_data_post(build_image, network, container):
 
         json_data = {"data": env_data}
         post_response = session.post(
-            "".join([JHUB_HUB_URL, "/set-user-data"]), json=json_data
+            "".join([JHUB_HUB_URL, "/set-user-data"]),
+            data={'_xsrf': session.cookies['_xsrf']},
+            json=json_data
         )
         assert post_response.status_code == 200
     test_logger.info("End of test_json_data_post")

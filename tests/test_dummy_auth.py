@@ -48,19 +48,23 @@ def test_dummy_auth(build_image, container):
     """
     test_logger.info("Start of test_dummy_auth")
     assert wait_for_site(JHUB_URL) is True
-    with requests.Session() as s:
+    with requests.Session() as session:
         # login
         user = "a-new-user"
+        # Refresh cookies
+        session.get(JHUB_URL)
+
         # next to hub/home, else the login by
         #  default will return 500 because it will
         #  try and start a server right away with the new user
         # Which fails because the default
         #  spawner requires a matching local username
-        login_response = s.post(
+        login_response = session.post(
             JHUB_URL + "/hub/login?next=/hub/home",
-            data={"username": user, "password": "password"},
+            data={"username": user, "password": "password",
+            '_xsrf': session.cookies['_xsrf']}
         )
         assert login_response.status_code == 200
-        resp = s.get(JHUB_URL + "/hub/home")
+        resp = session.get(JHUB_URL + "/hub/home")
         assert resp.status_code == 200
     test_logger.info("End of test_dummy_auth")

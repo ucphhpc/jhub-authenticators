@@ -57,7 +57,7 @@ default_jhub_cont = {
     ],
     "ports": {PORT: PORT},
     "detach": "True",
-    "command": ["jupyterhub", "-f", target_config],
+    "command": ["jupyterhub", "--debug", "-f", target_config],
 }
 email_jhub_cont = {
     "image": IMAGE,
@@ -72,7 +72,7 @@ email_jhub_cont = {
     ],
     "ports": {PORT: PORT},
     "detach": "True",
-    "command": ["jupyterhub", "-f", target_config],
+    "command": ["jupyterhub", "--debug", "-f", target_config],
 }
 custom_data_header_jhub_cont = {
     "image": IMAGE,
@@ -87,7 +87,7 @@ custom_data_header_jhub_cont = {
     ],
     "ports": {PORT: PORT},
     "detach": "True",
-    "command": ["jupyterhub", "-f", target_config],
+    "command": ["jupyterhub", "--debug", "-f", target_config],
 }
 AUTH_STATE_NETWORK_NAME = "jhub_auth_state_network"
 auth_state_network_config = {
@@ -145,7 +145,7 @@ auth_state_json_data_jhub_cont = {
     "detach": "True",
     "environment": {"JUPYTERHUB_CRYPT_KEY": base64.b64encode(os.urandom(32))},
     "network": AUTH_JSON_DATA_NETWORK_NAME,
-    "command": ["jupyterhub", "-f", target_config],
+    "command": ["jupyterhub", "--debug", "-f", target_config],
 }
 
 
@@ -425,11 +425,13 @@ def test_json_data_post(build_image, network, container):
         }
         env_data = {"StringData": data_str, "JsonData": data_dict}
 
-        json_data = {"data": env_data}
+        json_data = {
+            "data": env_data,
+        }
         post_response = session.post(
             "".join([JHUB_HUB_URL, "/set-user-data"]),
-            data={'_xsrf': session.cookies['_xsrf']},
-            json=json_data
+            json=json_data,
+            params={'_xsrf': session.cookies['_xsrf']},
         )
         assert post_response.status_code == 200
     test_logger.info("End of test_json_data_post")

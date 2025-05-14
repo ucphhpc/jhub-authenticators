@@ -33,6 +33,7 @@ dockerclean:
 dockerpush:
 	${DOCKER} push ${OWNER}/${IMAGE}:${TAG}
 
+.PHONY: clean
 clean:
 	$(MAKE) dockerclean
 	$(MAKE) distclean

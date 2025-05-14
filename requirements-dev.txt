@@ -1,4 +1,4 @@
 black==24.10.0
 docutils>=0.21.2
-flake8==6.1.0
+flake8>=7.1.2
 Click>=8.2.0

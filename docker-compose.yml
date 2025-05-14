@@ -1,5 +1,3 @@
-version: '3.7'
-
 services:
   jupyterhub:
     image: ucphhpc/jhub-authenticators:edge

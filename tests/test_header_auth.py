@@ -172,14 +172,14 @@ def test_default_header_config(build_image, container):
         auth_response = session.get(
             "".join([JHUB_HUB_URL, "/home"]),
             headers=auth_header,
-            params={'_xsrf': session.cookies['_xsrf']},
+            params={"_xsrf": session.cookies["_xsrf"]},
         )
         assert auth_response.status_code == 200
 
         auth_response = session.post(
             "".join([JHUB_HUB_URL, "/login"]),
             headers=auth_header,
-            params={'_xsrf': session.cookies['_xsrf']},
+            params={"_xsrf": session.cookies["_xsrf"]},
         )
         assert auth_response.status_code == 200
     test_logger.info("End of test_default_header_config")
@@ -216,7 +216,7 @@ def test_custom_data_header_auth(build_image, container):
         auth_response = session.post(
             "".join([JHUB_HUB_URL, "/login"]),
             headers=auth_data_header,
-            params={'_xsrf': session.cookies['_xsrf']},
+            params={"_xsrf": session.cookies["_xsrf"]},
         )
         assert auth_response.status_code == 200
     test_logger.info("End of test_custom_data_header_auth")
@@ -262,12 +262,14 @@ def test_auth_state_header_auth(build_image, network, container):
         auth_response = session.post(
             "".join([JHUB_HUB_URL, "/login"]),
             headers=auth_data_header,
-            params={'_xsrf': session.cookies['_xsrf']},
+            params={"_xsrf": session.cookies["_xsrf"]},
         )
         assert auth_response.status_code == 200
         # Spawn with auth_state
-        spawn_response = session.post("".join([JHUB_HUB_URL, "/spawn"]),
-                    params={'_xsrf': session.cookies['_xsrf']})
+        spawn_response = session.post(
+            "".join([JHUB_HUB_URL, "/spawn"]),
+            params={"_xsrf": session.cookies["_xsrf"]},
+        )
         assert spawn_response.status_code == 200
 
         test_logger.info("Spawn POST response message: {}".format(spawn_response.text))
@@ -332,15 +334,14 @@ def test_remote_oid_user_header_auth(build_image, container):
         auth_header = {"Remote-User": remote_user}
 
         auth_response = session.get(
-            "".join([JHUB_HUB_URL, "/home"]),
-            headers=auth_header
+            "".join([JHUB_HUB_URL, "/home"]), headers=auth_header
         )
         assert auth_response.status_code == 200
 
         auth_response = session.post(
             "".join([JHUB_HUB_URL, "/login"]),
             headers=auth_header,
-            params={'_xsrf': session.cookies['_xsrf']}
+            params={"_xsrf": session.cookies["_xsrf"]},
         )
         assert auth_response.status_code == 200
     test_logger.info("End of test_remote_oid_user_header_auth")
@@ -376,7 +377,7 @@ def test_basic_cert_user_header_auth(build_image, container):
         auth_response = session.post(
             "".join([JHUB_HUB_URL, "/login"]),
             headers=auth_header,
-            params={'_xsrf': session.cookies['_xsrf']},
+            params={"_xsrf": session.cookies["_xsrf"]},
         )
         assert auth_response.status_code == 200
         # TODO, validate username is actual email regex
@@ -412,7 +413,7 @@ def test_json_data_post(build_image, network, container):
         auth_response = session.post(
             "".join([JHUB_HUB_URL, "/login"]),
             headers=auth_header,
-            params={'_xsrf': session.cookies['_xsrf']},
+            params={"_xsrf": session.cookies["_xsrf"]},
         )
         assert auth_response.status_code == 200
         # Post json
@@ -430,7 +431,7 @@ def test_json_data_post(build_image, network, container):
         post_response = session.post(
             "".join([JHUB_HUB_URL, "/set-user-data"]),
             json=json_data,
-            params={'_xsrf': session.cookies['_xsrf']},
+            params={"_xsrf": session.cookies["_xsrf"]},
         )
         assert post_response.status_code == 200
     test_logger.info("End of test_json_data_post")

@@ -75,7 +75,9 @@ class HeaderAuthenticator(Authenticator):
             "HeaderAuthenticator - Request authentication with "
             "handler: {}, data: {} of type: {}".format(handler, data, type(data))
         )
-        self.log.debug("HeaderAuthenticator allowed headers: {}".format(self.allowed_headers))
+        self.log.debug(
+            "HeaderAuthenticator allowed headers: {}".format(self.allowed_headers)
+        )
         user_data = {}
         # Process remaining allowed_headers, save valid in user_data
         for allowed_index, allowed_value in self.allowed_headers.items():

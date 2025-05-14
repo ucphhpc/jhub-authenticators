@@ -1,4 +1,5 @@
 """A simple jupyter config file for testing the authenticator."""
+
 from jhubauthenticators import RegexUsernameParser
 
 c = get_config()

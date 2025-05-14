@@ -62,7 +62,7 @@ def test_dummy_auth(build_image, container):
         login_response = session.post(
             JHUB_URL + "/hub/login?next=/hub/home",
             data={"username": user, "password": "password"},
-            params={'_xsrf': session.cookies['_xsrf']}
+            params={"_xsrf": session.cookies["_xsrf"]},
         )
         assert login_response.status_code == 200
         resp = session.get(JHUB_URL + "/hub/home")

@@ -34,10 +34,7 @@ dockerpush:
 	${DOCKER} push ${OWNER}/${IMAGE}:${TAG}
 
 .PHONY: clean
-clean:
-	$(MAKE) dockerclean
-	$(MAKE) distclean
-	$(MAKE) venv-clean
+clean: dockerclean distclean venv-clean
 	rm -fr .env
 	rm -fr .pytest_cache
 	rm -fr tests/__pycache__
@@ -61,8 +58,7 @@ install-dep:
 	$(VENV)/pip install -r requirements.txt
 
 .PHONY: install
-install:
-	$(MAKE) install-dep
+install: install-dep
 	$(VENV)/pip install .
 
 .PHONY: uninstall

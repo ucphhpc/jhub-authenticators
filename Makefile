@@ -43,7 +43,7 @@ clean:
 	rm -fr tests/__pycache__
 
 .PHONY: dist
-dist:
+dist: venv
 	$(VENV)/python setup.py sdist bdist_wheel
 
 .PHONY: distclean

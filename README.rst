@@ -1,8 +1,6 @@
 =========================
 Jupyterhub Authenticators
 =========================
-.. image:: https://travis-ci.com/ucphhpc/jhub-authenticators.svg?branch=master
-    :target: https://travis-ci.com/ucphhpc/jhub-authenticators
 .. image:: https://badge.fury.io/py/jhub-authenticators.svg
     :target: https://badge.fury.io/py/jhub-authenticators
 

@@ -5,7 +5,7 @@ c = get_config()
 c.JupyterHub.hub_ip = "0.0.0.0"
 
 c.JupyterHub.spawner_class = "dockerspawner.DockerSpawner"
-c.DockerSpawner.image = "jupyter/base-notebook:latest"
+c.DockerSpawner.image = "quay.io/jupyter/base-notebook:latest"
 c.DockerSpawner.network_name = "jhub_auth_json_network"
 # Due a change in how the DockerSpawner escapes usernames in >=12.0.0
 # https://jupyterhub-dockerspawner.readthedocs.io/en/latest/changelog.html#id1
@@ -14,4 +14,5 @@ c.DockerSpawner.network_name = "jhub_auth_json_network"
 c.DockerSpawner.escape = "legacy"
 
 c.JupyterHub.authenticator_class = "jhubauthenticators.HeaderAuthenticator"
+c.Authenticator.allowed_users = ("new_user",)
 c.HeaderAuthenticator.user_external_allow_attributes = ["data"]

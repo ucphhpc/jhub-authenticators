@@ -364,9 +364,7 @@ def test_basic_cert_user_header_auth(build_image, container):
         # Refresh cookies
         session.get(JHUB_URL)
         # Auth requests
-        remote_user = (
-            "/C=DK/ST=NA/L=NA/O=NBI/OU=NA/CN=Name" "/emailAddress=mail@sdfsf.com"
-        )
+        remote_user = "/C=DK/ST=NA/L=NA/O=NBI/OU=NA/CN=Name/emailAddress=mail@sdfsf.com"
         auth_header = {"Remote-User": remote_user}
 
         auth_response = session.get(

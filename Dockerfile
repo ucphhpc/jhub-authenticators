@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install --no-install-recommends -yq \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN npm install -g configurable-http-proxy
+RUN npm install -g configurable-http-proxy@4.6.3
 
 ADD jhubauthenticators /app/jhubauthenticators
 ADD setup.py /app/setup.py

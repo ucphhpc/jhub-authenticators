@@ -31,4 +31,6 @@ pipelines:
       SRC_DIRECTORY: jhub-authenticators
       TEST_DIRECTORY: jhub-authenticators
       PUSH_DIRECTORY: publish-python-scripts
+      PYPI_USERNAME: ${PYPI_USERNAME}
+      PYPI_PASSWORD: ${PYPI_PASSWORD}
     template: bare_metal_pypi_package

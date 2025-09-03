@@ -17,7 +17,6 @@ RUN npm install -g configurable-http-proxy@4.6.3
 
 ADD jhubauthenticators /app/jhubauthenticators
 ADD setup.py /app/setup.py
-ADD version.py /app/version.py
 ADD requirements.txt /app/requirements.txt
 ADD requirements-dev.txt /app/requirements-dev.txt
 ADD tests/requirements.txt /app/tests/requirements.txt

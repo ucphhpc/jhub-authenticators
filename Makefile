@@ -43,8 +43,11 @@ clean:
 	rm -fr tests/__pycache__
 
 .PHONY: dist
-dist: venv
-	$(VENV)/python setup.py sdist bdist_wheel
+dist: venv install-dist-dep
+	$(VENV)/python -m build .
+
+install-dist-dep: venv
+	$(VENV)/pip install build
 
 .PHONY: distclean
 distclean:
@@ -61,8 +64,7 @@ install-dep:
 	$(VENV)/pip install -r requirements.txt
 
 .PHONY: install
-install:
-	$(MAKE) install-dep
+install: install-dep
 	$(VENV)/pip install .
 
 .PHONY: uninstall

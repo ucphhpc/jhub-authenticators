@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=ubuntu:focal-20210416
+ARG BASE_IMAGE=debian:bookworm-slim
 FROM $BASE_IMAGE AS builder
 
 USER root
@@ -24,10 +24,9 @@ ADD tests/requirements.txt /app/tests/requirements.txt
 
 WORKDIR /app
 
-RUN touch README.rst \
-    && pip3 install .
-
-RUN pip3 install dockerspawner
+RUN pip3 install dockerspawner --break-system-packages \
+    && touch README.rst \
+    && pip3 install . --break-system-packages
 
 WORKDIR /etc/jupyterhub
 

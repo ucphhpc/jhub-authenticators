@@ -2,8 +2,8 @@ environments:
   bare_metal_pypi_package:
     environments:
       GIT_USER: "{{SECRET:[github][username]}}"
-      PYPI_USERNAME: '{{SECRET:[pypi][jhub_authenticators][username]}}'
-      PYPI_PASSWORD: '{{SECRET:[pypi][jhub_authenticators][password]}}'
+      PYPI_USERNAME: '{{SECRET:[jhub_authenticators][username]}}'
+      PYPI_PASSWORD: '{{SECRET:[jhub_authenticators][password]}}'
     pipelines:
       - jhub-authenticators
 pipelines:

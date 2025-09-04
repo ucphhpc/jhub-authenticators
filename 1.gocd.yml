@@ -1,6 +1,6 @@
 environments:
-  bare_metal_pypi_package:
-    environments:
+  jhub_authenticators:
+    environment_variables:
       GIT_USER: "{{SECRET:[github][username]}}"
       PYPI_USERNAME: '{{SECRET:[jhub_authenticators][username]}}'
       PYPI_PASSWORD: '{{SECRET:[jhub_authenticators][password]}}'
@@ -31,6 +31,4 @@ pipelines:
       SRC_DIRECTORY: jhub-authenticators
       TEST_DIRECTORY: jhub-authenticators
       PUSH_DIRECTORY: publish-python-scripts
-      PYPI_USERNAME: ${PYPI_USERNAME}
-      PYPI_PASSWORD: ${PYPI_PASSWORD}
     template: bare_metal_pypi_package

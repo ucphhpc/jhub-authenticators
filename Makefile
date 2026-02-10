@@ -7,6 +7,14 @@ IMAGE=${PACKAGE_NAME}
 DOCKER_BUILDKIT=1
 # NOTE: dynamic lookup with docker as default and fallback to podman
 DOCKER = $(shell which docker 2>/dev/null || which podman 2>/dev/null)
+# if docker compose plugin is not available, try old docker-compose/podman-compose
+ifeq (, $(shell ${DOCKER} help|grep compose))
+	DOCKER_COMPOSE = $(shell which docker-compose 2>/dev/null || which podman-compose 2>/dev/null)
+else
+	DOCKER_COMPOSE = ${DOCKER} compose
+endif
+$(echo ${DOCKER_COMPOSE} >/dev/null)
+
 TAG=edge
 ARGS=
 
@@ -32,6 +40,14 @@ dockerclean:
 .PHONY: dockerpush
 dockerpush:
 	${DOCKER} push ${OWNER}/${IMAGE}:${TAG}
+
+.PHONY: up
+up:
+	${DOCKER_COMPOSE} up -d $(ARGS)
+
+.PHONY: down
+down:
+	${DOCKER_COMPOSE} down $(ARGS)
 
 .PHONY: clean
 clean:

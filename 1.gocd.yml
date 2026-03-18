@@ -27,10 +27,11 @@ pipelines:
         password: "{{SECRET:[github][access_token]}}"
         destination: publish-python-scripts
     parameters:
-      ARGS: ''
       SRC_DIRECTORY: jhub-authenticators
+      BUILD_MAKE_TARGET: 'all'
       BUILD_MAKE_ARGS: ''
       TEST_DIRECTORY: jhub-authenticators
+      TEST_MAKE_TARGET: 'test'
       TEST_MAKE_ARGS: ''
       PUSH_DIRECTORY: publish-python-scripts
     template: bare_metal_pypi_package
